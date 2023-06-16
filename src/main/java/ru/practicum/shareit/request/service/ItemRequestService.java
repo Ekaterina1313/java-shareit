@@ -1,11 +1,10 @@
-package ru.practicum.shareit.request.dao;
+package ru.practicum.shareit.request.service;
 
 import ru.practicum.shareit.request.model.ItemRequest;
-import ru.practicum.shareit.user.model.User;
 
 import java.util.List;
 
-public interface ItemRequestDao {
+public interface ItemRequestService {
     ItemRequest createItemRequest(ItemRequest itemRequest);
 
     List<ItemRequest> getAllItemRequests();

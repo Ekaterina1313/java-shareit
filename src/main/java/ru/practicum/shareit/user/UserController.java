@@ -3,6 +3,7 @@ package ru.practicum.shareit.user;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 
@@ -21,23 +22,23 @@ public class UserController {
     }
 
     @GetMapping
-    public List<User> getAllUsers() {
+    public List<UserDto> getAllUsers() {
         return userService.getAllUsers();
     }
 
     @PostMapping
-    public User createUser(@RequestBody User user) {
-        return userService.createUser(user);
+    public UserDto createUser(@RequestBody UserDto userDto) {
+        return userService.createUser(userDto);
     }
 
     @GetMapping("/{id}")
-    public User getUserById(@PathVariable long id) {
+    public UserDto getUserById(@PathVariable long id) {
         return userService.getUserById(id);
     }
 
-    @PatchMapping
-    public User updateUser(@RequestBody long id) {
-        return userService.updateUser(id);
+    @PatchMapping("/{id}")
+    public UserDto updateUser(@PathVariable long id, @RequestBody UserDto userDto) {
+        return userService.updateUser(id, userDto);
     }
 
     @DeleteMapping("/{id}")
@@ -45,4 +46,3 @@ public class UserController {
         userService.deleteUser(id);
     }
 }
-//List<User> getAllUsers(@RequestBody List<User> listOfUsers)

@@ -20,38 +20,34 @@ public class UserDaoImpl implements UserDao {
     private final Map<Long, User> mapOfAllUsers = new HashMap<>();
     private static Long id = 1L;
     @Override
-    public UserDto createUser(UserDto userDto) {
-        User user = UserMapper.fromUserDto(userDto);
+    public User createUser(User user) {
         user.setId(id);
         id++;
         mapOfAllUsers.put(user.getId(), user);
-        return UserMapper.toUserDto(user);
+        return user;
     }
 
     @Override
-    public List<UserDto> getAllUsers() {
-        List<UserDto> userDtoList = mapOfAllUsers.values().stream()
-                .map(UserMapper::toUserDto)
-                .collect(Collectors.toList());
-        return userDtoList;
+    public Map<Long, User> getAllUsers() {
+        return mapOfAllUsers;
     }
 
     @Override
-    public UserDto getUserById(long id) {
-        return UserMapper.toUserDto(mapOfAllUsers.get(id));
+    public User getUserById(long id) {
+        return mapOfAllUsers.get(id);
     }
 
     @Override
-    public UserDto updateUser(long id, UserDto userDto) {
-        User user = UserMapper.fromUserDto(userDto);
-        if (userDto.getName() != null) {
-            user.setName(userDto.getName());
+    public User updateUser(long id, User user) {
+        User user2 = mapOfAllUsers.get(id);
+        if (user.getName() != null) {
+            user2.setName(user.getName());
         }
-        if (userDto.getEmail() != null) {
-            user.setEmail(userDto.getEmail());
+        if (user.getEmail() != null) {
+            user2.setEmail(user.getEmail());
         }
-        mapOfAllUsers.put(id, user);
-        return UserMapper.toUserDto(user);
+        mapOfAllUsers.put(id, user2);
+        return user2;
     }
 
     @Override
@@ -60,7 +56,17 @@ public class UserDaoImpl implements UserDao {
     }
 
     @Override
-    public boolean isContain(long id) {
+    public boolean isContainUser(long id) {
         return mapOfAllUsers.containsKey(id);
+    }
+
+    @Override
+    public boolean isContainEmail(String email) {
+        for (User element : mapOfAllUsers.values()) {
+            if (element.getEmail().equals(email)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

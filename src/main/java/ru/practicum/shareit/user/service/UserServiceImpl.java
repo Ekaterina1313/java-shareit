@@ -3,16 +3,16 @@ package ru.practicum.shareit.user.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
+import ru.practicum.shareit.exception.EmailAlreadyExistsException;
 import ru.practicum.shareit.exception.EntityNotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.user.dao.UserDao;
-import ru.practicum.shareit.user.dao.UserDaoImpl;
 import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.dto.UserMapper;
 import ru.practicum.shareit.user.model.User;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -32,30 +32,41 @@ public class UserServiceImpl implements UserService {
             throw new ValidationException("Адрес электронной почты не должен быть пустым.");
         } else if (!userDto.getEmail().contains("@")) {
             throw new ValidationException("Некорректный формат e-mail. Адрес электронной почты должен содержать символ '@'.");
+        } else if (userDao.isContainEmail(userDto.getEmail())) {
+            throw new EmailAlreadyExistsException("Адрес электронной почты уже используется другим пользователем.");
         }
-        return userDao.createUser(userDto);
+        User user = UserMapper.fromUserDto(userDto);
+        User createdUser = userDao.createUser(user);
+        return UserMapper.toUserDto(createdUser);
     }
 
     @Override
     public List<UserDto> getAllUsers() {
-        return userDao.getAllUsers();
+        return userDao.getAllUsers().values().stream()
+                .map(UserMapper::toUserDto)
+                .collect(Collectors.toList());
     }
 
     @Override
     public UserDto getUserById(long id) {
-        if (!userDao.isContain(id)) {
+        if (!userDao.isContainUser(id)) {
             throw new EntityNotFoundException("Пользователь с указанным id = " + id + " не найден.");
         }
-        return userDao.getUserById(id);
+        return UserMapper.toUserDto(userDao.getUserById(id));
     }
     @Override
     public UserDto updateUser(long id, UserDto userDto) {
-        if (!userDao.isContain(id)) {
+        if (!userDao.isContainUser(id)) {
             throw new EntityNotFoundException("Пользователь с указанным id = \" + id + \" не найден.");
         }
         if (userDto.getEmail() != null) {
             if (!userDto.getEmail().contains("@")) {
                 throw new ValidationException("Некорректный формат e-mail. Адрес электронной почты должен содержать символ '@'.");
+            }
+            if (userDao.isContainEmail(userDto.getEmail())) {
+                if (!userDto.getEmail().equals(userDao.getUserById(id).getEmail())) {
+                    throw new EmailAlreadyExistsException("Адрес электронной почты уже используется другим пользователем.");
+                }
             }
         }
         if (userDto.getName() != null) {
@@ -63,12 +74,13 @@ public class UserServiceImpl implements UserService {
                 throw new ValidationException("Поле не должно быть пустым.");
             }
         }
-       return userDao.updateUser(id, userDto);
+        User updatedUser = userDao.updateUser(id, UserMapper.fromUserDto(userDto));
+       return UserMapper.toUserDto(updatedUser);
     }
 
     @Override
     public void deleteUser(long  id) {
-        if (!userDao.isContain(id)) {
+        if (!userDao.isContainUser(id)) {
             throw new EntityNotFoundException("Пользователь с указанным id = " + id + " не найден.");
         }
        userDao.deleteUser(id);

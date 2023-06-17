@@ -1,21 +1,23 @@
 package ru.practicum.shareit.user.dao;
 
-import org.springframework.web.bind.annotation.PathVariable;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 
 import java.util.List;
+import java.util.Map;
 
 public interface UserDao {
-    UserDto createUser(UserDto userDto);
+    User createUser(User user);
 
-    List<UserDto> getAllUsers();
+    Map<Long, User> getAllUsers();
 
-    UserDto getUserById(long id);
+    User getUserById(long id);
 
-    UserDto updateUser(long id, UserDto userDto);
+    User updateUser(long id, User user);
 
     void deleteUser(long  id);
 
-    boolean isContain(long id);
+    boolean isContainUser(long id);
+
+    boolean isContainEmail(String email);
 }

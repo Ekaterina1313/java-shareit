@@ -1,20 +1,16 @@
 package ru.practicum.shareit.item.dao;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
-import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @Repository
-@Slf4j
 public class ItemDaoImpl implements ItemDao {
     private Map<Long, Item> mapOfItems = new HashMap<>();
     private static Long itemId = 1L;
+
     @Override
     public Item createItem(Item item) {
         item.setId(itemId);
@@ -24,7 +20,7 @@ public class ItemDaoImpl implements ItemDao {
     }
 
     @Override
-   public Map<Long, Item> getAllItems() {
+    public Map<Long, Item> getAllItems() {
         return mapOfItems;
     }
 
@@ -58,5 +54,4 @@ public class ItemDaoImpl implements ItemDao {
     public boolean isContainItem(long id) {
         return mapOfItems.containsKey(id);
     }
-
 }

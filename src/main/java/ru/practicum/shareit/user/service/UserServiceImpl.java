@@ -37,6 +37,7 @@ public class UserServiceImpl implements UserService {
         }
         User user = UserMapper.fromUserDto(userDto);
         User createdUser = userDao.createUser(user);
+        log.info("Пользователь {} с id = {} успешно добавлен.", userDto.getName(), userDto.getId());
         return UserMapper.toUserDto(createdUser);
     }
 
@@ -54,6 +55,7 @@ public class UserServiceImpl implements UserService {
         }
         return UserMapper.toUserDto(userDao.getUserById(id));
     }
+
     @Override
     public UserDto updateUser(long id, UserDto userDto) {
         if (!userDao.isContainUser(id)) {
@@ -75,15 +77,15 @@ public class UserServiceImpl implements UserService {
             }
         }
         User updatedUser = userDao.updateUser(id, UserMapper.fromUserDto(userDto));
-       return UserMapper.toUserDto(updatedUser);
+        log.info("Информация о пользователе {} с id = {} успешно обновлена.", userDto.getName(), userDto.getId());
+        return UserMapper.toUserDto(updatedUser);
     }
 
     @Override
-    public void deleteUser(long  id) {
+    public void deleteUser(long id) {
         if (!userDao.isContainUser(id)) {
             throw new EntityNotFoundException("Пользователь с указанным id = " + id + " не найден.");
         }
-       userDao.deleteUser(id);
+        userDao.deleteUser(id);
     }
-
 }

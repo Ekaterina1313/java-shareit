@@ -11,7 +11,6 @@ import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.dao.UserDao;
-import ru.practicum.shareit.user.dto.UserMapper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,6 +49,7 @@ public class ItemServiceImpl implements ItemService {
         Item item = ItemMapper.fromItemDto(itemDto);
         item.setOwner(userDao.getUserById(userId));
         Item createdItem = itemDao.createItem(item);
+        log.info("'{}' успешно добавлена пользователем с id = {}.", itemDto.getName(), userId);
         return ItemMapper.toItemDto(createdItem);
     }
 
@@ -61,6 +61,7 @@ public class ItemServiceImpl implements ItemService {
         if (!userDao.isContainUser(userId)) {
             throw new EntityNotFoundException("Пользователь с указанным id = " + userId + " не найден.");
         }
+        log.info("Получен список вещей пользователя с id = {}.", userId);
         return itemDao.getAllItems().values().stream()
                 .filter(item -> item.getOwner().getId().equals(userId))
                 .map(ItemMapper::toItemDto)
@@ -105,12 +106,13 @@ public class ItemServiceImpl implements ItemService {
         itemDto.setId(itemId);
         Item item = ItemMapper.fromItemDto(itemDto);
         item.setOwner(userDao.getUserById(userId));
+        log.info("Информация о вещи '{}' успешно обновлена.", itemDto.getName());
         return ItemMapper.toItemDto(itemDao.updateItem(item));
     }
 
 
     @Override
-    public void deleteItem (Long id, Long userId){
+    public void deleteItem(Long id, Long userId) {
         if (userId == null) {
             throw new ValidationException("Необходимо указать id пользователя в заголовке запроса.");
         }
@@ -142,9 +144,10 @@ public class ItemServiceImpl implements ItemService {
         itemDao.getAllItems().values().stream()
                 .filter(item -> item.getAvailable() &&
                         (item.getName().toLowerCase().contains(toLowerCaseText) ||
-                        item.getDescription().toLowerCase().contains(toLowerCaseText)))
+                                item.getDescription().toLowerCase().contains(toLowerCaseText)))
                 .map(ItemMapper::toItemDto)
                 .forEach(itemDtos::add);
+        log.info("Составлен список вещей, найденных по ключевым словам '{}'.", searchText);
         return itemDtos;
     }
 }

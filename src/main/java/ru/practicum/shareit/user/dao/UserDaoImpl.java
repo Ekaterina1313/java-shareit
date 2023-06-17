@@ -2,23 +2,17 @@ package ru.practicum.shareit.user.dao;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
-import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PathVariable;
-import ru.practicum.shareit.user.dto.UserDto;
-import ru.practicum.shareit.user.dto.UserMapper;
 import ru.practicum.shareit.user.model.User;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Repository
 @Slf4j
 public class UserDaoImpl implements UserDao {
     private final Map<Long, User> mapOfAllUsers = new HashMap<>();
     private static Long id = 1L;
+
     @Override
     public User createUser(User user) {
         user.setId(id);
@@ -51,7 +45,7 @@ public class UserDaoImpl implements UserDao {
     }
 
     @Override
-   public void deleteUser(long  id) {
+    public void deleteUser(long id) {
         mapOfAllUsers.remove(id);
     }
 

@@ -24,7 +24,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     }
 
     @Override
-   public List<ItemRequest> getAllItemRequests() {
+    public List<ItemRequest> getAllItemRequests() {
         return itemRequestDao.getAllItemRequests();
     }
 
@@ -39,7 +39,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     }
 
     @Override
-    public void deleteItemRequest(long  id) {
+    public void deleteItemRequest(long id) {
         itemRequestDao.deleteItemRequest(id);
     }
 }

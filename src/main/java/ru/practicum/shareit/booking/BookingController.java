@@ -21,7 +21,7 @@ public class BookingController {
     }
 
     @GetMapping
-   public Booking createBooking(Booking booking) {
+    public Booking createBooking(Booking booking) {
         return bookingService.createBooking(booking);
     }
 
@@ -41,7 +41,7 @@ public class BookingController {
     }
 
     @DeleteMapping("/{id}")
-    public void deleteBooking(@PathVariable long  id) {
+    public void deleteBooking(@PathVariable long id) {
         bookingService.deleteBooking(id);
     }
 }

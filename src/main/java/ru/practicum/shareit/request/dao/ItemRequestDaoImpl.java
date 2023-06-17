@@ -15,7 +15,7 @@ public class ItemRequestDaoImpl implements ItemRequestDao {
     Map<Long, ItemRequest> mapOfItemRequests = new HashMap<>();
 
     @Override
-    public ItemRequest createItemRequest (ItemRequest itemRequest) {
+    public ItemRequest createItemRequest(ItemRequest itemRequest) {
         return itemRequest;
     }
 

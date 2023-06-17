@@ -35,7 +35,7 @@ public class BookingDaoImpl implements BookingDao {
     }
 
     @Override
-     public void deleteBooking(long  id) {
+    public void deleteBooking(long id) {
 
     }
 }

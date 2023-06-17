@@ -7,7 +7,6 @@ import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.model.Status;
 import ru.practicum.shareit.user.model.User;
 
-import java.sql.Date;
 import java.time.LocalDateTime;
 
 @AllArgsConstructor
@@ -20,5 +19,4 @@ public class Booking {
     private Item item;
     private User booker;
     private Status status;
-
 }

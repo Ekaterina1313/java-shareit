@@ -13,5 +13,5 @@ public interface ItemRequestService {
 
     ItemRequest updateItemRequest(long id);
 
-    void deleteItemRequest(long  id);
+    void deleteItemRequest(long id);
 }

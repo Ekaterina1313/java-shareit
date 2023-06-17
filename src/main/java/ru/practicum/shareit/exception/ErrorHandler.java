@@ -13,7 +13,6 @@ public class ErrorHandler {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleEntityNotFoundException(final EntityNotFoundException exception) {
-        log.info(exception.getMessage());
         return new ErrorResponse(exception.getMessage());
     }
 
@@ -35,12 +34,5 @@ public class ErrorHandler {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleUserIsNotOwnerException(final UserIsNotOwnerException exception) {
         return new ErrorResponse(exception.getMessage());
-    }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ErrorResponse handleThrowable(final Throwable e) {
-        log.info(e.getMessage());
-        return new ErrorResponse(e.getMessage());
     }
 }

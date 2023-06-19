@@ -3,15 +3,18 @@ package ru.practicum.shareit.request.dao;
 import ru.practicum.shareit.request.model.ItemRequest;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface ItemRequestDao {
-    ItemRequest createItemRequest(ItemRequest itemRequest);
+    ItemRequest create(ItemRequest itemRequest);
 
-    List<ItemRequest> getAllItemRequests();
+    List<ItemRequest> getAll(Long userId);
 
-    ItemRequest getItemRequestById(long id);
+    Optional<ItemRequest> getById(Long id);
 
-    ItemRequest updateItemRequest(long id);
+    ItemRequest update(ItemRequest itemRequest);
 
-    void deleteItemRequest(long id);
+    void delete(Long id);
+
+    boolean isContainItemRequest(Long id);
 }

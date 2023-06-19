@@ -3,15 +3,18 @@ package ru.practicum.shareit.booking.dao;
 import ru.practicum.shareit.booking.model.Booking;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface BookingDao {
-    Booking createBooking(Booking booking);
+    Booking create(Booking booking);
 
-    List<Booking> getAllBookings();
+    List<Booking> getAll(Long userId);
 
-    Booking getBookingById(long id);
+    Optional<Booking> getById(Long id);
 
-    Booking updateBooking(long id);
+    Booking update(Booking booking);
 
-    void deleteBooking(long id);
+    void delete(Long id);
+
+    boolean isContainBooking(Long id);
 }

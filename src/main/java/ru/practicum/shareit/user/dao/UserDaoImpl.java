@@ -4,8 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.user.model.User;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 @Repository
 @Slf4j
@@ -14,7 +13,7 @@ public class UserDaoImpl implements UserDao {
     private static Long id = 1L;
 
     @Override
-    public User createUser(User user) {
+    public User create(User user) {
         user.setId(id);
         id++;
         mapOfAllUsers.put(user.getId(), user);
@@ -22,17 +21,17 @@ public class UserDaoImpl implements UserDao {
     }
 
     @Override
-    public Map<Long, User> getAllUsers() {
-        return mapOfAllUsers;
+    public List<User> getAll() {
+        return new ArrayList<>(mapOfAllUsers.values());
     }
 
     @Override
-    public User getUserById(long id) {
-        return mapOfAllUsers.get(id);
+    public Optional<User> getById(Long id) {
+        return Optional.ofNullable(mapOfAllUsers.get(id));
     }
 
     @Override
-    public User updateUser(long id, User user) {
+    public User update(Long id, User user) {
         User user2 = mapOfAllUsers.get(id);
         if (user.getName() != null) {
             user2.setName(user.getName());
@@ -45,12 +44,12 @@ public class UserDaoImpl implements UserDao {
     }
 
     @Override
-    public void deleteUser(long id) {
+    public void delete(Long id) {
         mapOfAllUsers.remove(id);
     }
 
     @Override
-    public boolean isContainUser(long id) {
+    public boolean isContainUser(Long id) {
         return mapOfAllUsers.containsKey(id);
     }
 

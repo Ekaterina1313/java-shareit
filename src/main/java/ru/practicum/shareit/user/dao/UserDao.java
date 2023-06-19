@@ -2,20 +2,21 @@ package ru.practicum.shareit.user.dao;
 
 import ru.practicum.shareit.user.model.User;
 
-import java.util.Map;
+import java.util.List;
+import java.util.Optional;
 
 public interface UserDao {
-    User createUser(User user);
+    User create(User user);
 
-    Map<Long, User> getAllUsers();
+    List<User> getAll();
 
-    User getUserById(long id);
+    Optional<User> getById(Long id);
 
-    User updateUser(long id, User user);
+    User update(Long id, User user);
 
-    void deleteUser(long id);
+    void delete(Long id);
 
-    boolean isContainUser(long id);
+    boolean isContainUser(Long id);
 
     boolean isContainEmail(String email);
 }

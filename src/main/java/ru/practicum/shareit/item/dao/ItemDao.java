@@ -2,18 +2,21 @@ package ru.practicum.shareit.item.dao;
 
 import ru.practicum.shareit.item.model.Item;
 
-import java.util.Map;
+import java.util.List;
+import java.util.Optional;
 
 public interface ItemDao {
-    Item createItem(Item item);
+    Item create(Item item);
 
-    Map<Long, Item> getAllItems();
+    List<Item> getAll(Long userId);
 
-    Item getItemById(long id);
+    Optional<Item> getById(Long id);
 
-    Item updateItem(Item item);
+    Item update(Item item);
 
-    void deleteItem(long id);
+    void delete(Long id);
 
-    boolean isContainItem(long id);
+    List<Item> search(String searchText, Long userId);
+
+    boolean isContainItem(Long id);
 }

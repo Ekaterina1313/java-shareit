@@ -3,15 +3,20 @@ package ru.practicum.shareit.user.service;
 import ru.practicum.shareit.user.dto.UserDto;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface UserService {
-    UserDto createUser(UserDto userDto);
+    UserDto create(UserDto userDto);
 
-    List<UserDto> getAllUsers();
+    List<UserDto> getAll();
 
-    UserDto getUserById(long id);
+    Optional<UserDto> getById(Long id);
 
-    UserDto updateUser(long id, UserDto userDto);
+    UserDto update(Long id, UserDto userDto);
 
-    void deleteUser(long id);
+    void delete(Long id);
+
+    boolean isContainEmail(String email);
+
+    boolean isContainUser(Long id);
 }

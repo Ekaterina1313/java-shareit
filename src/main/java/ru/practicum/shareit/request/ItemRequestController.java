@@ -4,12 +4,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.exception.BadRequestException;
-import ru.practicum.shareit.exception.EntityNotFoundException;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
 import ru.practicum.shareit.request.service.ItemRequestService;
 
 import java.util.List;
-import java.util.Optional;
 
 
 @RestController
@@ -40,21 +38,15 @@ public class ItemRequestController {
     }
 
     @GetMapping("/{id}")
-    public Optional<ItemRequestDto> getById(@PathVariable Long id, @RequestHeader("X-Sharer-User-Id") Long userId) {
+    public ItemRequestDto getById(@PathVariable Long id, @RequestHeader("X-Sharer-User-Id") Long userId) {
         isValidUser(userId);
-        if (!itemRequestService.isContainItemRequest(id)) {
-            throw new EntityNotFoundException("Запрос на вещь не найден.");
-        }
-        return itemRequestService.getById(id);
+        return itemRequestService.getById(id, userId);
     }
 
     @PatchMapping("/{id}")
     public ItemRequestDto update(@RequestBody Long id, @RequestHeader("X-Sharer-User-Id") Long userId,
                                  @RequestBody ItemRequestDto itemRequestDto) {
         isValidUser(userId);
-        if (!itemRequestService.isContainItemRequest(id)) {
-            throw new EntityNotFoundException("Запрос на вещь не найден.");
-        }
         if (itemRequestDto.getDescription() == null) {
             if (itemRequestDto.getDescription().isBlank()) {
                 throw new BadRequestException("Поле с описанием не должно быть пустым.");
@@ -66,18 +58,12 @@ public class ItemRequestController {
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id, @RequestHeader("X-Sharer-User-Id") Long userId) {
         isValidUser(userId);
-        if (!itemRequestService.isContainItemRequest(id)) {
-            throw new EntityNotFoundException("Запрос на вещь не найден.");
-        }
         itemRequestService.delete(id, userId);
     }
 
     private boolean isValidUser(Long userId) {
         if (userId == null) {
             throw new BadRequestException("Необходимо указать id пользователя в заголовке запроса.");
-        }
-        if (!itemRequestService.isContainUser(userId)) {
-            throw new EntityNotFoundException("Пользователь с указанным id = " + userId + " не найден.");
         }
         return true;
     }

@@ -63,9 +63,4 @@ public class ItemDaoImpl implements ItemDao {
     public void delete(Long id) {
         mapOfItems.remove(id);
     }
-
-    @Override
-    public boolean isContainItem(Long id) {
-        return mapOfItems.containsKey(id);
-    }
 }

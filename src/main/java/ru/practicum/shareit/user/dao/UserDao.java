@@ -16,7 +16,5 @@ public interface UserDao {
 
     void delete(Long id);
 
-    boolean isContainUser(Long id);
-
     boolean isContainEmail(String email);
 }

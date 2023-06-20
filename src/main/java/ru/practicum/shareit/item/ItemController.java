@@ -4,13 +4,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.exception.BadRequestException;
-import ru.practicum.shareit.exception.EntityNotFoundException;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.service.ItemService;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 
 @RestController
@@ -26,12 +24,7 @@ public class ItemController {
 
     @PostMapping
     public ItemDto create(@RequestBody ItemDto itemDto, @RequestHeader("X-Sharer-User-Id") Long userId) {
-        if (userId == null) {
-            throw new BadRequestException("Необходимо указать id пользователя в заголовке запроса.");
-        }
-        if (!itemService.isContainUser(userId)) {
-            throw new EntityNotFoundException("Пользователь с указанным id = " + userId + " не найден.");
-        }
+        isValid(userId);
         if (itemDto.getName() == null || itemDto.getName().isBlank()) {
             throw new BadRequestException("Имя вещи не должно быть пустым.");
         }
@@ -47,42 +40,21 @@ public class ItemController {
 
     @GetMapping
     public List<ItemDto> getAll(@RequestHeader("X-Sharer-User-Id") Long userId) {
-        if (userId == null) {
-            throw new BadRequestException("Необходимо указать id пользователя в заголовке запроса.");
-        }
-        if (!itemService.isContainUser(userId)) {
-            throw new EntityNotFoundException("Пользователь с указанным id = " + userId + " не найден.");
-        }
+        isValid(userId);
         log.info("Поступил запрос на получение списка вещей пользователя с id = {}.", userId);
         return itemService.getAll(userId);
     }
 
     @GetMapping("/{id}")
-    public Optional<ItemDto> getById(@PathVariable long id, @RequestHeader("X-Sharer-User-Id") Long userId) {
-        if (userId == null) {
-            throw new BadRequestException("Необходимо указать id пользователя в заголовке запроса.");
-        }
-        if (!itemService.isContainUser(userId)) {
-            throw new EntityNotFoundException("Пользователь с указанным id = " + userId + " не найден.");
-        }
-        if (!itemService.isContainItem(id)) {
-            throw new EntityNotFoundException("Вещь под указанным id не найдена.");
-        }
+    public ItemDto getById(@PathVariable long id, @RequestHeader("X-Sharer-User-Id") Long userId) {
+        isValid(userId);
         log.info("Поступил запрос на получение вещи с с id = {}.", id);
         return itemService.getById(id, userId);
     }
 
     @PatchMapping("/{itemId}")
     public ItemDto update(@PathVariable Long itemId, @RequestHeader("X-Sharer-User-Id") Long userId, @RequestBody ItemDto itemDto) {
-        if (userId == null) {
-            throw new BadRequestException("Необходимо указать id пользователя в заголовке запроса.");
-        }
-        if (!itemService.isContainUser(userId)) {
-            throw new EntityNotFoundException("Пользователь с указанным id = " + userId + " не найден.");
-        }
-        if (!itemService.isContainItem(itemId)) {
-            throw new EntityNotFoundException("Вещь под указанным id не найдена.");
-        }
+        isValid(userId);
         if (itemDto.getName() != null) {
             if (itemDto.getName().isBlank()) {
                 throw new BadRequestException("Имя вещи не должно быть пустым.");
@@ -99,15 +71,7 @@ public class ItemController {
 
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id, @RequestHeader("X-Sharer-User-Id") Long userId) {
-        if (userId == null) {
-            throw new BadRequestException("Необходимо указать id пользователя в заголовке запроса.");
-        }
-        if (!itemService.isContainUser(userId)) {
-            throw new EntityNotFoundException("Пользователь с указанным id = " + userId + " не найден.");
-        }
-        if (!itemService.isContainItem(id)) {
-            throw new EntityNotFoundException("Вещь под указанным id не найдена.");
-        }
+        isValid(userId);
         log.info("Поступил запрос на удаление вещи с id = {}.", id);
         itemService.delete(id, userId);
     }
@@ -115,16 +79,18 @@ public class ItemController {
     @GetMapping("/search")
     public List<ItemDto> search(@RequestParam("text") String searchText,
                                 @RequestHeader("X-Sharer-User-Id") Long userId) {
-        if (userId == null) {
-            throw new BadRequestException("Необходимо указать id пользователя в заголовке запроса.");
-        }
-        if (!itemService.isContainUser(userId)) {
-            throw new EntityNotFoundException("Пользователь с указанным id = " + userId + " не найден.");
-        }
+        isValid(userId);
         if (searchText == null || searchText.isBlank()) {
             return new ArrayList<>();
         }
         log.info("Поступил запрос на поиск списка вещей ключевым словам: {}.", searchText);
         return itemService.search(searchText, userId);
+    }
+
+    private boolean isValid(Long userId) {
+        if (userId == null) {
+            throw new BadRequestException("Необходимо указать id пользователя в заголовке запроса.");
+        }
+        return true;
     }
 }

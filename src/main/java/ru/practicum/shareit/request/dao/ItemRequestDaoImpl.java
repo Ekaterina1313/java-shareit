@@ -50,9 +50,4 @@ public class ItemRequestDaoImpl implements ItemRequestDao {
     public void delete(Long id) {
         mapOfItemRequests.remove(id);
     }
-
-    @Override
-    public boolean isContainItemRequest(Long id) {
-        return mapOfItemRequests.containsKey(id);
-    }
 }

@@ -15,6 +15,4 @@ public interface ItemRequestDao {
     ItemRequest update(ItemRequest itemRequest);
 
     void delete(Long id);
-
-    boolean isContainItemRequest(Long id);
 }

@@ -17,6 +17,4 @@ public interface ItemDao {
     void delete(Long id);
 
     List<Item> search(String searchText, Long userId);
-
-    boolean isContainItem(Long id);
 }

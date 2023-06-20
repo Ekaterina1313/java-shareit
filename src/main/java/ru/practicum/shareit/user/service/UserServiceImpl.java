@@ -10,7 +10,6 @@ import ru.practicum.shareit.user.dto.UserMapper;
 import ru.practicum.shareit.user.model.User;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -25,6 +24,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto create(UserDto userDto) {
+        if (isContainEmail(userDto.getEmail())) {
+            throw new RuntimeException("Адрес электронной почты уже используется другим пользователем.");
+        }
         User user = UserMapper.fromUserDto(userDto);
         User createdUser = userDao.create(user);
         log.info("Пользователь {} с id = {} успешно добавлен.", userDto.getName(), userDto.getId());
@@ -37,12 +39,21 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Optional<UserDto> getById(Long id) {
-        return Optional.of(UserMapper.toUserDto(userDao.getById(id).get()));
+    public UserDto getById(Long id) {
+        User userById = userDao.getById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Пользователь с указанным id = " + id + " не найден."));
+        return UserMapper.toUserDto(userById);
     }
 
     @Override
     public UserDto update(Long id, UserDto userDto) {
+        User userById = userDao.getById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Пользователь с указанным id = " + id + " не найден."));
+        if (isContainEmail(userDto.getEmail())) {
+            if (!userDto.getEmail().equals(userById.getEmail())) {
+                throw new RuntimeException("Адрес электронной почты уже используется другим пользователем.");
+            }
+        }
         User updatedUser = userDao.update(id, UserMapper.fromUserDto(userDto));
         log.info("Информация о пользователе {} с id = {} успешно обновлена.", userDto.getName(), userDto.getId());
         return UserMapper.toUserDto(updatedUser);
@@ -50,19 +61,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void delete(Long id) {
-        if (!userDao.isContainUser(id)) {
-            throw new EntityNotFoundException("Пользователь с указанным id = " + id + " не найден.");
-        }
+        userDao.getById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Пользователь с указанным id = " + id + " не найден."));
         userDao.delete(id);
     }
 
-    @Override
-    public boolean isContainUser(Long id) {
-        return userDao.isContainUser(id);
-    }
-
-    @Override
-    public boolean isContainEmail(String email) {
+    private boolean isContainEmail(String email) {
         return userDao.isContainEmail(email);
     }
 }

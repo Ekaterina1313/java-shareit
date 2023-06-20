@@ -49,11 +49,6 @@ public class UserDaoImpl implements UserDao {
     }
 
     @Override
-    public boolean isContainUser(Long id) {
-        return mapOfAllUsers.containsKey(id);
-    }
-
-    @Override
     public boolean isContainEmail(String email) {
         for (User element : mapOfAllUsers.values()) {
             if (element.getEmail().equals(email)) {

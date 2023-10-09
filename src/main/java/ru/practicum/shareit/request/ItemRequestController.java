@@ -2,6 +2,7 @@ package ru.practicum.shareit.request;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.exception.BadRequestException;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
@@ -17,7 +18,7 @@ public class ItemRequestController {
     private final ItemRequestService itemRequestService;
 
     @Autowired
-    public ItemRequestController(ItemRequestService itemRequestService) {
+    public ItemRequestController(@Qualifier("itemRequestServiceRepository") ItemRequestService itemRequestService) {
         this.itemRequestService = itemRequestService;
     }
 

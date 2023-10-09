@@ -35,7 +35,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public BookingDto create(BookingDto bookingDto, Long userId) {
-        Booking bookingById = bookingDao.getById(bookingDto.getId())
+        bookingDao.getById(bookingDto.getId())
                 .orElseThrow(() -> new EntityNotFoundException("Не найдена бронь с id: " + userId));
         User userById = userDao.getById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("Не найден пользователь с id: " + userId));

@@ -3,8 +3,8 @@ package ru.practicum.shareit.request.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.exception.BadRequestException;
 import ru.practicum.shareit.exception.EntityNotFoundException;
+import ru.practicum.shareit.exception.PersonalValidationException;
 import ru.practicum.shareit.request.dao.ItemRequestRepository;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
 import ru.practicum.shareit.request.dto.ItemRequestMapper;
@@ -13,7 +13,6 @@ import ru.practicum.shareit.user.dao.UserRepository;
 import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
-import java.util.IllegalFormatCodePointException;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -65,7 +64,7 @@ public class ItemRequestServiceRepository implements ItemRequestService{
         userRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Не найден пользователь с id: " + id));
         if (!Objects.equals(itemRequest2.getRequestor().getId(), userId)) {
-            throw new BadRequestException("Нельзя изменить чужой запрос.");
+            throw new PersonalValidationException("Нельзя изменить чужой запрос.");
         }
         if (!itemRequestDto.getDescription().isBlank() || itemRequestDto.getDescription() != null) {
             itemRequest2.setDescription(itemRequestDto.getDescription());
@@ -80,7 +79,7 @@ public class ItemRequestServiceRepository implements ItemRequestService{
         ItemRequest itemRequest2 = itemRequestRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Не найден запрос с id: " + id));
         if (!Objects.equals(itemRequest2.getRequestor().getId(), userId)) {
-            throw new BadRequestException("Пользователь с id = " + userId + " не может удалить чужой запрос.");
+            throw new PersonalValidationException("Пользователь с id = " + userId + " не может удалить чужой запрос.");
         }
         itemRequestRepository.deleteById(id);
     }

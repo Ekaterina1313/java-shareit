@@ -4,7 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.exception.BadRequestException;
+import ru.practicum.shareit.exception.PersonalValidationException;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.service.ItemService;
 
@@ -26,14 +26,14 @@ public class ItemController {
     @PostMapping
     public ItemDto create(@RequestBody ItemDto itemDto, @RequestHeader("X-Sharer-User-Id") Long userId) {
         isValid(userId);
-        if (itemDto.getName() == null || itemDto.getName().isBlank()) {
-            throw new BadRequestException("Имя вещи не должно быть пустым.");
+        if ((itemDto.getName() == null) || (itemDto.getName().isBlank())) {
+            throw new PersonalValidationException("Имя вещи не должно быть пустым.");
         }
-        if (itemDto.getDescription() == null || itemDto.getDescription().isBlank()) {
-            throw new BadRequestException("Описание вещи не должно быть пустым.");
+        if ((itemDto.getDescription() == null) || (itemDto.getDescription().isBlank())) {
+            throw new PersonalValidationException("Описание вещи не должно быть пустым.");
         }
         if (itemDto.getAvailable() == null) {
-            throw new BadRequestException("Поле 'Available' не должно быть пустым. ");
+            throw new PersonalValidationException("Поле 'Available' не должно быть пустым. ");
         }
         log.info("Поступил запрос от пользователя с id = {} на добавление вещи c id = {}.", userId, itemDto.getId());
         return itemService.create(itemDto, userId);
@@ -58,12 +58,12 @@ public class ItemController {
         isValid(userId);
         if (itemDto.getName() != null) {
             if (itemDto.getName().isBlank()) {
-                throw new BadRequestException("Имя вещи не должно быть пустым.");
+                throw new PersonalValidationException("Имя вещи не должно быть пустым.");
             }
         }
         if (itemDto.getDescription() != null) {
             if (itemDto.getDescription().isBlank()) {
-                throw new BadRequestException("Описание вещи не должно быть пустым.");
+                throw new PersonalValidationException("Описание вещи не должно быть пустым.");
             }
         }
         log.info("Поступил запрос на обновление информации о вещи с id = {}.", itemId);
@@ -90,7 +90,7 @@ public class ItemController {
 
     private boolean isValid(Long userId) {
         if (userId == null) {
-            throw new BadRequestException("Необходимо указать id пользователя в заголовке запроса.");
+            throw new PersonalValidationException("Необходимо указать id пользователя в заголовке запроса.");
         }
         return true;
     }

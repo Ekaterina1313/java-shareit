@@ -3,8 +3,8 @@ package ru.practicum.shareit.request.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.exception.BadRequestException;
 import ru.practicum.shareit.exception.EntityNotFoundException;
+import ru.practicum.shareit.exception.PersonalValidationException;
 import ru.practicum.shareit.request.dao.ItemRequestDao;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
 import ru.practicum.shareit.request.dto.ItemRequestMapper;
@@ -62,7 +62,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         User userById = userDao.getById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Не найден пользователь с id: " + id));
         if (!Objects.equals(itemRequest2.getRequestor().getId(), userId)) {
-            throw new BadRequestException("Нельзя изменить чужой запрос.");
+            throw new PersonalValidationException("Нельзя изменить чужой запрос.");
         }
         itemRequestDto.setId(id);
         ItemRequest itemRequest = ItemRequestMapper.fromItemRequestDto(itemRequestDto);
@@ -77,7 +77,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         ItemRequest itemRequest2 = itemRequestDao.getById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Не найден запрос с id: " + id));
         if (!Objects.equals(itemRequest2.getRequestor().getId(), userId)) {
-            throw new BadRequestException("Пользователь с id = " + userId + " не может удалить чужой запрос.");
+            throw new PersonalValidationException("Пользователь с id = " + userId + " не может удалить чужой запрос.");
         }
         itemRequestDao.delete(id);
     }

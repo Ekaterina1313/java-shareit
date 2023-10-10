@@ -3,8 +3,8 @@ package ru.practicum.shareit.item.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.exception.BadRequestException;
 import ru.practicum.shareit.exception.EntityNotFoundException;
+import ru.practicum.shareit.exception.PersonalValidationException;
 import ru.practicum.shareit.item.dao.ItemDao;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemMapper;
@@ -80,7 +80,7 @@ public class ItemServiceImpl implements ItemService {
         Item itemById = itemDao.getById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Не найдена вещь с id: " + userId));
         if (!Objects.equals(itemById.getOwner().getId(), userId)) {
-            throw new BadRequestException("Пользователь не является владельцем вещи.");
+            throw new PersonalValidationException("Пользователь не является владельцем вещи.");
         }
         itemDao.delete(id);
     }

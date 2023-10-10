@@ -7,9 +7,10 @@ import ru.practicum.shareit.booking.dao.BookingDao;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.model.States;
 import ru.practicum.shareit.booking.model.Status;
-import ru.practicum.shareit.exception.BadRequestException;
 import ru.practicum.shareit.exception.EntityNotFoundException;
+import ru.practicum.shareit.exception.PersonalValidationException;
 import ru.practicum.shareit.item.dao.ItemDao;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.dao.UserDao;
@@ -42,13 +43,18 @@ public class BookingServiceImpl implements BookingService {
         Item itemById = itemDao.getById(bookingDto.getItemId())
                 .orElseThrow(() -> new EntityNotFoundException("Не найдена вещь с id: " + userId));
         if (!itemById.getAvailable()) {
-            throw new BadRequestException("Выбранная вещь недоступна для бронирования.");
+            throw new PersonalValidationException("Выбранная вещь недоступна для бронирования.");
         }
         Booking createdBooking = BookingMapper.fromBookingDto(bookingDto);
         createdBooking.setStatus(Status.WAITING);
         createdBooking.setBooker(userById);
         createdBooking.setItem(itemById);
         return BookingMapper.toBookingDto(bookingDao.create(createdBooking));
+    }
+
+    @Override
+    public List<BookingDto> getBookingsByUserId(States state, Long userId) {
+        return null;
     }
 
     @Override
@@ -78,7 +84,7 @@ public class BookingServiceImpl implements BookingService {
         Booking bookingById = bookingDao.getById(bookingDto.getId())
                 .orElseThrow(() -> new EntityNotFoundException("Не найдена бронь с id: " + userId));
         if (!Objects.equals(bookingById.getBooker().getId(), id)) {
-            throw new BadRequestException("Пользователь с id = " + userId + " не оставлял бронь.");
+            throw new PersonalValidationException("Пользователь с id = " + userId + " не оставлял бронь.");
         }
         bookingDto.setId(id);
         Booking booking = BookingMapper.fromBookingDto(bookingDto);
@@ -94,8 +100,13 @@ public class BookingServiceImpl implements BookingService {
         Booking bookingById = bookingDao.getById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Не найдена бронь с id: " + userId));
         if (!Objects.equals(bookingById.getBooker().getId(), id)) {
-            throw new BadRequestException("Пользователь с id = " + userId + " не оставлял бронь.");
+            throw new PersonalValidationException("Пользователь с id = " + userId + " не оставлял бронь.");
         }
         bookingDao.delete(id);
+    }
+
+    @Override
+    public BookingDto statusConfirm(Long bookingId, Long userId, Boolean text) {
+        return null;
     }
 }

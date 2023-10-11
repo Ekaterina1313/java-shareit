@@ -40,7 +40,7 @@ public class BookingServiceImpl implements BookingService {
                 .orElseThrow(() -> new EntityNotFoundException("Не найдена бронь с id: " + userId));
         User userById = userDao.getById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("Не найден пользователь с id: " + userId));
-        Item itemById = itemDao.getById(bookingDto.getItemId())
+        Item itemById = itemDao.getById(bookingDto.getItem().getId())
                 .orElseThrow(() -> new EntityNotFoundException("Не найдена вещь с id: " + userId));
         if (!itemById.getAvailable()) {
             throw new PersonalValidationException("Выбранная вещь недоступна для бронирования.");
@@ -50,11 +50,6 @@ public class BookingServiceImpl implements BookingService {
         createdBooking.setBooker(userById);
         createdBooking.setItem(itemById);
         return BookingMapper.toBookingDto(bookingDao.create(createdBooking));
-    }
-
-    @Override
-    public List<BookingDto> getBookingsByUserId(States state, Long userId) {
-        return null;
     }
 
     @Override
@@ -79,7 +74,7 @@ public class BookingServiceImpl implements BookingService {
     public BookingDto update(Long id, Long userId, BookingDto bookingDto) {
         User userById = userDao.getById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("Не найден пользователь с id: " + userId));
-        Item itemById = itemDao.getById(bookingDto.getItemId())
+        Item itemById = itemDao.getById(bookingDto.getItem().getId())
                 .orElseThrow(() -> new EntityNotFoundException("Не найдена вещь с id: " + userId));
         Booking bookingById = bookingDao.getById(bookingDto.getId())
                 .orElseThrow(() -> new EntityNotFoundException("Не найдена бронь с id: " + userId));
@@ -109,4 +104,15 @@ public class BookingServiceImpl implements BookingService {
     public BookingDto statusConfirm(Long bookingId, Long userId, Boolean text) {
         return null;
     }
+
+    @Override
+    public List<BookingDto> getBookingsByBookerId(States state, Long userId) {
+        return null;
+    }
+
+    @Override
+    public List<BookingDto> getBookingsByOwnerId(States state, Long userId) {
+        return null;
+    }
+
 }

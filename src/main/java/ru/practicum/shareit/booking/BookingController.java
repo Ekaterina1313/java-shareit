@@ -40,8 +40,11 @@ public class BookingController {
         }
         if (Objects.equals(bookingDto.getStart(), bookingDto.getEnd())) {
             throw new PersonalValidationException("Время начала бронирования не должно совпадать со временем окончания брони.");
-
         }
+        /*if () {
+            throw new PersonalValidationException("");
+
+        }*/
         return bookingService.create(bookingDto, userId);
     }
 
@@ -69,12 +72,18 @@ public class BookingController {
     }
 
     @GetMapping()
-    public List<BookingDto> getBookingsByUserId(@RequestParam(value = "state", defaultValue = "ALL") States state,
+    public List<BookingDto> getBookingsByBookerId(@RequestParam(value = "state", defaultValue = "ALL") States state,
             @RequestHeader("X-Sharer-User-Id") Long userId) {
         isValid(userId);
-        return bookingService.getBookingsByUserId(state, userId);
+        return bookingService.getBookingsByBookerId(state, userId);
     }
 
+    @GetMapping("/owner")
+    public List<BookingDto> getBookingsByOwnerId(@RequestParam(value = "state", defaultValue = "ALL") States state,
+                                                  @RequestHeader("X-Sharer-User-Id") Long userId) {
+        isValid(userId);
+        return bookingService.getBookingsByOwnerId(state, userId);
+    }
 
    /* @GetMapping
     public List<BookingDto> getAll(@RequestHeader("X-Sharer-User-Id") Long userId) {

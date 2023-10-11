@@ -48,8 +48,6 @@ public class BookingServiceRepository implements BookingService{
         createdBooking.setStatus(Status.WAITING);
         createdBooking.setBooker(userById);
         createdBooking.setItem(itemById);
-        itemById.setAvailable(false);
-        itemRepository.save(itemById);
         return BookingMapper.toBookingDto(bookingRepository.save(createdBooking));
     }
 
@@ -90,18 +88,18 @@ public class BookingServiceRepository implements BookingService{
 
 
     @Override
-    public List<BookingDto> getBookingsByUserId(States state, Long userId) {
+    public List<BookingDto> getBookingsByBookerId(States state, Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("Не найден пользователь с id: " + userId));
         List<Booking> listOfBookings;
         if (state == States.ALL) {
             listOfBookings = bookingRepository.findByBooker(user);
         } else if (state == States.CURRENT) {
-            listOfBookings = bookingRepository.findCurrentBookings(user, LocalDateTime.now());
+            listOfBookings = bookingRepository.findByBookerCurrent(user, LocalDateTime.now());
         } else if (state == States.PAST) {
-            listOfBookings = bookingRepository.findPastBookings(user, LocalDateTime.now());
+            listOfBookings = bookingRepository.findByBookerPast(user, LocalDateTime.now());
         } else if (state == States.FUTURE) {
-            listOfBookings = bookingRepository.findFutureBookings(user, LocalDateTime.now());
+            listOfBookings = bookingRepository.findByBookerFuture(user, LocalDateTime.now());
         } else if (state == States.WAITING) {
             listOfBookings = bookingRepository.findBookingsByBookerAndStatus(user, Status.WAITING);
         } else if (state == States.REJECTED) {
@@ -109,6 +107,30 @@ public class BookingServiceRepository implements BookingService{
         } else {
             throw new RuntimeException("Неподдерживаемое состояние бронирования: " + state);
         }
+        return listOfBookings.stream().map(BookingMapper::toBookingDto).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<BookingDto> getBookingsByOwnerId(States state, Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("Не найден пользователь с id: " + userId));
+        List<Booking> listOfBookings;
+
+            if (state == States.ALL) {
+                listOfBookings = bookingRepository.findByOwner(user);
+            } else if (state == States.CURRENT) {
+                listOfBookings = bookingRepository.findByOwnerCurrent(user, LocalDateTime.now());
+            } else if (state == States.PAST) {
+                listOfBookings = bookingRepository.findByOwnerPast(user, LocalDateTime.now());
+            } else if (state == States.FUTURE) {
+                listOfBookings = bookingRepository.findByOwnerFuture(user, LocalDateTime.now());
+            } else if (state == States.WAITING) {
+                listOfBookings = bookingRepository.findBookingsByOwnerAndStatus(user, Status.WAITING);
+            } else if (state == States.REJECTED) {
+                listOfBookings = bookingRepository.findBookingsByOwnerAndStatus(user, Status.REJECTED);
+            } else {
+                throw new RuntimeException("Неподдерживаемое состояние бронирования: " + state);
+            }
         return listOfBookings.stream().map(BookingMapper::toBookingDto).collect(Collectors.toList());
     }
 

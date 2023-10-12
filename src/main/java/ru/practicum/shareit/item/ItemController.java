@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.exception.PersonalValidationException;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemDtoToGet;
 import ru.practicum.shareit.item.service.ItemService;
 
 import java.util.ArrayList;
@@ -40,14 +41,14 @@ public class ItemController {
     }
 
     @GetMapping
-    public List<ItemDto> getAll(@RequestHeader("X-Sharer-User-Id") Long userId) {
+    public List<ItemDtoToGet> getAll(@RequestHeader("X-Sharer-User-Id") Long userId) {
         isValid(userId);
         log.info("Поступил запрос на получение списка вещей пользователя с id = {}.", userId);
         return itemService.getAll(userId);
     }
 
     @GetMapping("/{id}")
-    public ItemDto getById(@PathVariable long id, @RequestHeader("X-Sharer-User-Id") Long userId) {
+    public ItemDtoToGet getById(@PathVariable long id, @RequestHeader("X-Sharer-User-Id") Long userId) {
         isValid(userId);
         log.info("Поступил запрос на получение вещи с с id = {}.", id);
         return itemService.getById(id, userId);

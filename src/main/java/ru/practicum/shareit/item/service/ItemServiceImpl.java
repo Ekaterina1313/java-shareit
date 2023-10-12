@@ -7,6 +7,7 @@ import ru.practicum.shareit.exception.EntityNotFoundException;
 import ru.practicum.shareit.exception.PersonalValidationException;
 import ru.practicum.shareit.item.dao.ItemDao;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemDtoToGet;
 import ru.practicum.shareit.item.dto.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.dao.UserDao;
@@ -40,20 +41,21 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemDto> getAll(Long userId) {
+    public List<ItemDtoToGet> getAll(Long userId) {
         userDao.getById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("Не найден пользователь с id: " + userId));
         log.info("Получен список вещей пользователя с id = {}.", userId);
-        return itemDao.getAll(userId).stream().map(ItemMapper::toItemDto).collect(Collectors.toList());
+        return null;
     }
 
     @Override
-    public ItemDto getById(Long id, Long userId) {
+    public ItemDtoToGet getById(Long id, Long userId) {
         userDao.getById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("Не найден пользователь с id: " + userId));
         Item itemById = itemDao.getById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Не найдена вещь с id: " + userId));
-        return ItemMapper.toItemDto(itemById);
+        //return ItemMapper.toItemDto(itemById);
+        return null;
     }
 
     @Override

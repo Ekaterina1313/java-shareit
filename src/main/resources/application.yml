@@ -9,16 +9,16 @@ spring:
   sql:
     init:
       mode: always
-  #config:
-    #activate:
-     # on-profile: ci,test
+  config:
+    activate:
+      on-profile: ci,test
   datasource:
     driverClassName: org.postgresql.Driver
     url: jdbc:postgresql://localhost:5432/bookingDB
     username: bookings-owner
     password: 123
 
-logging:
+    logging:
   level:
     org.springframework.orm.jpa: INFO
     org.springframework.transaction: INFO

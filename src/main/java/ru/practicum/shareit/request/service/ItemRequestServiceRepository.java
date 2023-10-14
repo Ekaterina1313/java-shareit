@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 
 @Service
 @Slf4j
-public class ItemRequestServiceRepository implements ItemRequestService{
+public class ItemRequestServiceRepository implements ItemRequestService {
     private final UserRepository userRepository;
     private final ItemRequestRepository itemRequestRepository;
 
@@ -52,8 +52,9 @@ public class ItemRequestServiceRepository implements ItemRequestService{
     public ItemRequestDto getById(Long id, Long userId) {
         userRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Не найден пользователь с id: " + userId));
-       ItemRequest itemRequest = itemRequestRepository.findById(id)
-               .orElseThrow(() -> new EntityNotFoundException("Не найден пользователь с id: " + userId));;
+        ItemRequest itemRequest = itemRequestRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Не найден пользователь с id: " + userId));
+        ;
         return ItemRequestMapper.toItemRequestDto(itemRequest);
     }
 

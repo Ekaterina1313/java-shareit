@@ -7,7 +7,6 @@ import ru.practicum.shareit.booking.dao.BookingRepository;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
-import ru.practicum.shareit.booking.model.States;
 import ru.practicum.shareit.booking.model.Status;
 import ru.practicum.shareit.exception.EntityNotFoundException;
 import ru.practicum.shareit.exception.PersonalValidationException;
@@ -23,7 +22,7 @@ import java.util.stream.Collectors;
 
 @Service
 @Slf4j
-public class BookingServiceRepository implements BookingService{
+public class BookingServiceRepository implements BookingService {
     private final BookingRepository bookingRepository;
     private final UserRepository userRepository;
     private final ItemRepository itemRepository;
@@ -86,8 +85,7 @@ public class BookingServiceRepository implements BookingService{
                 .orElseThrow(() -> new EntityNotFoundException("Не найдена бронь с id: " + userId));
         Item itemById = bookingById.getItem();
         if ((!Objects.equals(bookingById.getBooker().getId(), userId)) &&
-                (!Objects.equals(itemById.getOwner().getId(), userId)))
-        {
+                (!Objects.equals(itemById.getOwner().getId(), userId))) {
             throw new EntityNotFoundException("Пользователь не является владельцем вещи или арендатором.");
         }
         return BookingMapper.toBookingDto(bookingById);
@@ -125,21 +123,21 @@ public class BookingServiceRepository implements BookingService{
                 .orElseThrow(() -> new EntityNotFoundException("Не найден пользователь с id: " + userId));
         List<Booking> listOfBookings;
 
-            if (state.equalsIgnoreCase("all")) {
-                listOfBookings = bookingRepository.findByOwner(user);
-            } else if (state.equalsIgnoreCase("current")) {
-                listOfBookings = bookingRepository.findByOwnerCurrent(user, LocalDateTime.now());
-            } else if (state.equalsIgnoreCase("past")) {
-                listOfBookings = bookingRepository.findByOwnerPast(user, LocalDateTime.now());
-            } else if (state.equalsIgnoreCase("future")) {
-                listOfBookings = bookingRepository.findByOwnerFuture(user, LocalDateTime.now());
-            } else if (state.equalsIgnoreCase("waiting")) {
-                listOfBookings = bookingRepository.findBookingsByOwnerAndStatus(user, Status.WAITING);
-            } else if (state.equalsIgnoreCase("rejected")) {
-                listOfBookings = bookingRepository.findBookingsByOwnerAndStatus(user, Status.REJECTED);
-            } else {
-                throw new PersonalValidationException("Unknown state: " + state);
-            }
+        if (state.equalsIgnoreCase("all")) {
+            listOfBookings = bookingRepository.findByOwner(user);
+        } else if (state.equalsIgnoreCase("current")) {
+            listOfBookings = bookingRepository.findByOwnerCurrent(user, LocalDateTime.now());
+        } else if (state.equalsIgnoreCase("past")) {
+            listOfBookings = bookingRepository.findByOwnerPast(user, LocalDateTime.now());
+        } else if (state.equalsIgnoreCase("future")) {
+            listOfBookings = bookingRepository.findByOwnerFuture(user, LocalDateTime.now());
+        } else if (state.equalsIgnoreCase("waiting")) {
+            listOfBookings = bookingRepository.findBookingsByOwnerAndStatus(user, Status.WAITING);
+        } else if (state.equalsIgnoreCase("rejected")) {
+            listOfBookings = bookingRepository.findBookingsByOwnerAndStatus(user, Status.REJECTED);
+        } else {
+            throw new PersonalValidationException("Unknown state: " + state);
+        }
         return listOfBookings.stream().map(BookingMapper::toBookingDto).collect(Collectors.toList());
     }
 
@@ -147,7 +145,6 @@ public class BookingServiceRepository implements BookingService{
     public List<BookingDto> getAll(Long userId) {
         return null;
     }
-
 
     @Override
     public BookingDto update(Long id, Long userId, BookingDto bookingDto) {

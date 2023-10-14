@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 
 @Service
 @Slf4j
-public class UserServiceRepository implements UserService{
+public class UserServiceRepository implements UserService {
     private final UserRepository userRepository;
 
     @Autowired
@@ -24,9 +24,6 @@ public class UserServiceRepository implements UserService{
 
     @Override
     public UserDto create(UserDto userDto) {
-        /*if (isContainEmail(userDto.getEmail())) {
-            throw new RuntimeException("Указанный e-mail уже занят.");
-        }*/
         User createdUser = userRepository.save(UserMapper.fromUserDto(userDto));
         return UserMapper.toUserDto(createdUser);
     }

@@ -10,7 +10,6 @@ import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemDtoToGet;
 import ru.practicum.shareit.item.service.ItemService;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 

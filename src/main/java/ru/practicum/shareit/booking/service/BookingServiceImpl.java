@@ -7,7 +7,6 @@ import ru.practicum.shareit.booking.dao.BookingDao;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
-import ru.practicum.shareit.booking.model.States;
 import ru.practicum.shareit.booking.model.Status;
 import ru.practicum.shareit.exception.EntityNotFoundException;
 import ru.practicum.shareit.exception.PersonalValidationException;
@@ -114,5 +113,4 @@ public class BookingServiceImpl implements BookingService {
     public List<BookingDto> getBookingsByOwnerId(String state, Long userId) {
         return null;
     }
-
 }

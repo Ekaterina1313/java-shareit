@@ -5,7 +5,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.Status;
-import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
@@ -39,7 +38,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     List<Booking> findByOwnerPast(@Param("owner") User owner, @Param("endTime") LocalDateTime endTime);
 
     @Query("select b from Booking b where b.item.owner = :owner and b.start > :time ORDER BY b.start desc")
-    List<Booking> findByOwnerFuture(@Param("owner") User owner, @Param("time")LocalDateTime time);
+    List<Booking> findByOwnerFuture(@Param("owner") User owner, @Param("time") LocalDateTime time);
 
     @Query("select b from Booking b where b.item.owner = :owner and b.status = :status ORDER BY b.start desc")
     List<Booking> findBookingsByOwnerAndStatus(User owner, Status status);
@@ -50,7 +49,5 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     @Query("select b from Booking  b where b.item.id  in :itemIds ")
     List<Booking> findAllByItemIdIn(@Param("itemIds") List<Long> itemIds);
 
-   // @Query("select b from Booking  b where b.booker.id = :bookerId and b.item.id = :itemId ")
     List<Booking> findBookingByBookerIdAndItemId(Long bookerId, Long itemId);
-
 }

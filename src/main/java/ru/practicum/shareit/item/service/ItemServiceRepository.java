@@ -57,8 +57,8 @@ public class ItemServiceRepository implements ItemService {
         userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("Не найден пользователь с id: " + userId));
         log.info("Получен список вещей пользователя с id = {}.", userId);
-       List<Item> userItems = itemRepository.findByOwnerId(userId);
-       List<Booking> allBooKings = bookingRepository.findAllByItemIdIn(userItems.stream().map(Item :: getId).collect(Collectors.toList()));
+        List<Item> userItems = itemRepository.findByOwnerId(userId);
+        List<Booking> allBooKings = bookingRepository.findAllByItemIdIn(userItems.stream().map(Item::getId).collect(Collectors.toList()));
         List<ItemDtoToGet> itemDtos = new ArrayList<>();
         List<Comment> allComments = commentRepository.findAll();
 
@@ -70,22 +70,22 @@ public class ItemServiceRepository implements ItemService {
             List<CommentDto> commentDtos = new ArrayList<>();
             for (Booking booking : itemBookings) {
                 if (!Objects.equals(booking.getStatus(), Status.REJECTED)) {
-                if (booking.getEnd().isBefore(LocalDateTime.now())) {
-                    if ((lastBooking == null) || (booking.getEnd().isAfter(lastBooking.getEnd()))) {
-                        lastBooking = booking;
+                    if (booking.getEnd().isBefore(LocalDateTime.now())) {
+                        if ((lastBooking == null) || (booking.getEnd().isAfter(lastBooking.getEnd()))) {
+                            lastBooking = booking;
+                        }
+                    }
+                    if (booking.getStart().isAfter(LocalDateTime.now())) {
+                        if ((nextBooking == null) || (booking.getStart().isBefore(nextBooking.getStart()))) {
+                            nextBooking = booking;
+                        }
                     }
                 }
-                if (booking.getStart().isAfter(LocalDateTime.now())) {
-                    if ((nextBooking == null) || (booking.getStart().isBefore(nextBooking.getStart()))) {
-                        nextBooking = booking;
-                    }
-                }
-            }
             }
 
             for (Comment comment : allComments) {
                 if (Objects.equals(comment.getItem().getId(), item.getId())) {
-                   commentDtos.add(CommentMapper.toCommentDto(comment));
+                    commentDtos.add(CommentMapper.toCommentDto(comment));
                 }
             }
 
@@ -115,11 +115,11 @@ public class ItemServiceRepository implements ItemService {
                                 lastBooking = booking;
                             }
                         }
-                            if (booking.getStart().isAfter(LocalDateTime.now())) {
-                                if (nextBooking == null || (booking.getStart().isBefore(nextBooking.getStart()))) {
-                                    nextBooking = booking;
-                                }
+                        if (booking.getStart().isAfter(LocalDateTime.now())) {
+                            if (nextBooking == null || (booking.getStart().isBefore(nextBooking.getStart()))) {
+                                nextBooking = booking;
                             }
+                        }
                     }
                 }
             }
@@ -206,5 +206,4 @@ public class ItemServiceRepository implements ItemService {
         createdComment.setCreated(LocalDateTime.now());
         return CommentMapper.toCommentDto(commentRepository.save(createdComment));
     }
-
 }

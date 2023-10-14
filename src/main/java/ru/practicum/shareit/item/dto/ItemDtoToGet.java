@@ -4,21 +4,18 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import ru.practicum.shareit.booking.dto.BookingDto;
-import ru.practicum.shareit.booking.model.Booking;
 
-import java.awt.print.Book;
 import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
 public class ItemDtoToGet {
-        private Long id;
-        private String name;
-        private String description;
-        private Boolean available;
-        private BookingDto lastBooking;
-        private BookingDto nextBooking;
-        private List<CommentDto> comments;
-    }
-
+    private Long id;
+    private String name;
+    private String description;
+    private Boolean available;
+    private BookingDto lastBooking;
+    private BookingDto nextBooking;
+    private List<CommentDto> comments;
+}

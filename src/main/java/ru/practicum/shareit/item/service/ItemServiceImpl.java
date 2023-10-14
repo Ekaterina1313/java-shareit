@@ -55,7 +55,6 @@ public class ItemServiceImpl implements ItemService {
                 .orElseThrow(() -> new EntityNotFoundException("Не найден пользователь с id: " + userId));
         Item itemById = itemDao.getById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Не найдена вещь с id: " + userId));
-        //return ItemMapper.toItemDto(itemById);
         return null;
     }
 

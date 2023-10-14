@@ -7,6 +7,7 @@ import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.model.Booking;
 
 import java.awt.print.Book;
+import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -18,5 +19,6 @@ public class ItemDtoToGet {
         private Boolean available;
         private BookingDto lastBooking;
         private BookingDto nextBooking;
+        private List<CommentDto> comments;
     }
 

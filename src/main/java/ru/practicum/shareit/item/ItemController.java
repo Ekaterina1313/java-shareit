@@ -5,10 +5,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.exception.PersonalValidationException;
+import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemDtoToGet;
 import ru.practicum.shareit.item.service.ItemService;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -87,6 +89,15 @@ public class ItemController {
         }
         log.info("Поступил запрос на поиск списка вещей ключевым словам: {}.", searchText);
         return itemService.search(searchText, userId);
+    }
+
+    @PostMapping("/{itemId}/comment")
+    public CommentDto createComment(@RequestBody CommentDto commentDto, @PathVariable Long itemId,
+                                    @RequestHeader("X-Sharer-User-Id") Long userId) {
+        if ((commentDto.getText().isBlank()) || (commentDto.getText().isEmpty())) {
+            throw new PersonalValidationException("Заполните поле 'text'.");
+        }
+        return itemService.createComment(commentDto, itemId, userId);
     }
 
     private boolean isValid(Long userId) {

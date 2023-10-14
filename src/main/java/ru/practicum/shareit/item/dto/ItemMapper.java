@@ -5,6 +5,8 @@ import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 
+import java.util.List;
+
 
 public class ItemMapper {
     public static ItemDto toItemDto(Item item) {
@@ -26,14 +28,15 @@ public class ItemMapper {
         );
     }
 
-    public static ItemDtoToGet toItemDtoToGet(Item item, BookingDto lastBooking, BookingDto nextBooking) {
+    public static ItemDtoToGet toItemDtoToGet(Item item, BookingDto lastBooking, BookingDto nextBooking, List<CommentDto> comments) {
         return new ItemDtoToGet(
                 item.getId(),
                 item.getName(),
                 item.getDescription(),
                 item.getAvailable(),
                 lastBooking,
-                nextBooking
+                nextBooking,
+                comments
         );
     }
 

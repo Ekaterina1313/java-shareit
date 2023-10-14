@@ -35,7 +35,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             " ORDER BY b.start desc")
     List<Booking> findByOwnerCurrent(@Param("owner") User owner, @Param("time") LocalDateTime time);
 
-    @Query("select b from Booking b where b.item.owner = :owner and b.end > :endTime ORDER BY b.start desc")
+    @Query("select b from Booking b where b.item.owner = :owner and b.end < :endTime ORDER BY b.start desc")
     List<Booking> findByOwnerPast(@Param("owner") User owner, @Param("endTime") LocalDateTime endTime);
 
     @Query("select b from Booking b where b.item.owner = :owner and b.start > :time ORDER BY b.start desc")
@@ -49,5 +49,8 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     @Query("select b from Booking  b where b.item.id  in :itemIds ")
     List<Booking> findAllByItemIdIn(@Param("itemIds") List<Long> itemIds);
+
+   // @Query("select b from Booking  b where b.booker.id = :bookerId and b.item.id = :itemId ")
+    List<Booking> findBookingByBookerIdAndItemId(Long bookerId, Long itemId);
 
 }

@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.EntityNotFoundException;
 import ru.practicum.shareit.exception.PersonalValidationException;
 import ru.practicum.shareit.item.dao.ItemDao;
+import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemDtoToGet;
 import ru.practicum.shareit.item.dto.ItemMapper;
@@ -93,5 +94,10 @@ public class ItemServiceImpl implements ItemService {
                 .orElseThrow(() -> new EntityNotFoundException("Не найден пользователь с id: " + userId));
         log.info("Составлен список вещей, найденных по ключевым словам '{}'.", searchText);
         return itemDao.search(searchText, userId).stream().map(ItemMapper::toItemDto).collect(Collectors.toList());
+    }
+
+    @Override
+    public CommentDto createComment(CommentDto commentDto, Long itemId, Long authorId) {
+        return null;
     }
 }

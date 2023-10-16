@@ -14,11 +14,11 @@ import java.util.stream.Collectors;
 
 @Service
 @Slf4j
-public class UserServiceRepository implements UserService {
+public class UserServiceImplBD implements UserService {
     private final UserRepository userRepository;
 
     @Autowired
-    public UserServiceRepository(UserRepository userRepository) {
+    public UserServiceImplBD(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 
@@ -30,21 +30,21 @@ public class UserServiceRepository implements UserService {
 
     @Override
     public List<UserDto> getAll() {
-        return userRepository.findAll().stream().map(UserMapper::toUserDto).collect(Collectors.toList());
+        return userRepository.findAll().stream()
+                .map(UserMapper::toUserDto)
+                .collect(Collectors.toList());
     }
 
     @Override
     public UserDto getById(Long id) {
-        User userById = userRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Пользователь с указанным id = " + id + " не найден."));
+        User userById = validUser(id);
         return UserMapper.toUserDto(userById);
     }
 
     @Override
     public UserDto update(Long id, UserDto userDto) {
-        User userById = userRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Пользователь с указанным id = " + id + " не найден."));
-        if (isContainEmail(userDto.getEmail())) {
+        User userById = validUser(id);
+        if (userRepository.isExistEmail(userDto.getEmail())) {
             if (!userDto.getEmail().equals(userById.getEmail())) {
                 throw new RuntimeException("Адрес электронной почты уже используется другим пользователем.");
             }
@@ -62,12 +62,13 @@ public class UserServiceRepository implements UserService {
 
     @Override
     public void delete(Long id) {
-        userRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Пользователь с указанным id = " + id + " не найден."));
+        validUser(id);
         userRepository.deleteById(id);
     }
 
-    private boolean isContainEmail(String email) {
-        return userRepository.isContainEmail(email);
+    private User validUser(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("Не найден пользователь с id: " + userId));
     }
+
 }

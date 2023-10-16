@@ -20,7 +20,7 @@ public class BookingController {
     private final BookingService bookingService;
 
     @Autowired
-    public BookingController(@Qualifier("bookingServiceRepository") BookingService bookingService) {
+    public BookingController(@Qualifier("bookingServiceImplBD") BookingService bookingService) {
         this.bookingService = bookingService;
     }
 
@@ -32,13 +32,15 @@ public class BookingController {
             throw new PersonalValidationException("Укажите время начала/окончания бронирования.");
         }
         if (bookingDto.getEnd().isBefore(bookingDto.getStart())) {
-            throw new PersonalValidationException("Время окончания бронирования не может быть раньше времени начала бронирования.");
+            throw new PersonalValidationException("Время окончания бронирования не может быть раньше времени " +
+                    "начала бронирования.");
         }
         if (bookingDto.getStart().isBefore(LocalDateTime.now())) {
             throw new PersonalValidationException("Время начала бронирования не может быть в прошлом.");
         }
         if (Objects.equals(bookingDto.getStart(), bookingDto.getEnd())) {
-            throw new PersonalValidationException("Время начала бронирования не должно совпадать со временем окончания брони.");
+            throw new PersonalValidationException("Время начала бронирования не должно совпадать со временем " +
+                    "окончания брони.");
         }
         return bookingService.create(bookingDto, userId);
     }

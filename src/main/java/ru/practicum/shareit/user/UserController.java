@@ -18,7 +18,7 @@ public class UserController {
     private final UserService userService;
 
     @Autowired
-    public UserController(@Qualifier("userServiceRepository") UserService userService) {
+    public UserController(@Qualifier("userServiceImplBD") UserService userService) {
         this.userService = userService;
     }
 
@@ -36,7 +36,8 @@ public class UserController {
         } else if (userDto.getEmail() == null || userDto.getEmail().isBlank()) {
             throw new PersonalValidationException("Адрес электронной почты не должен быть пустым.");
         } else if (!userDto.getEmail().contains("@")) {
-            throw new PersonalValidationException("Некорректный формат e-mail. Адрес электронной почты должен содержать символ '@'.");
+            throw new PersonalValidationException("Некорректный формат e-mail. " +
+                    "Адрес электронной почты должен содержать символ '@'.");
         }
         log.info("Поступил запрос на создание пользователя {} c id = {}.", userDto.getName(), userDto.getId());
         return userService.create(userDto);
@@ -52,7 +53,8 @@ public class UserController {
     public UserDto update(@PathVariable Long id, @RequestBody UserDto userDto) {
         if (userDto.getEmail() != null) {
             if (!userDto.getEmail().contains("@")) {
-                throw new PersonalValidationException("Некорректный формат e-mail. Адрес электронной почты должен содержать символ '@'.");
+                throw new PersonalValidationException("Некорректный формат e-mail. " +
+                        "Адрес электронной почты должен содержать символ '@'.");
             }
         }
         if (userDto.getName() != null) {
@@ -60,7 +62,8 @@ public class UserController {
                 throw new PersonalValidationException("Поле не должно быть пустым.");
             }
         }
-        log.info("Поступил запрос на обновление информации о пользователе {} c id = {}.", userDto.getName(), userDto.getId());
+        log.info("Поступил запрос на обновление информации о пользователе {} c id = {}.",
+                userDto.getName(), userDto.getId());
         return userService.update(id, userDto);
     }
 

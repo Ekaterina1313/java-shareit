@@ -21,7 +21,7 @@ public class ItemController {
     private final ItemService itemService;
 
     @Autowired
-    public ItemController(@Qualifier("itemServiceRepository") ItemService itemService) {
+    public ItemController(@Qualifier("itemServiceImplBD") ItemService itemService) {
         this.itemService = itemService;
     }
 
@@ -56,7 +56,8 @@ public class ItemController {
     }
 
     @PatchMapping("/{itemId}")
-    public ItemDto update(@PathVariable Long itemId, @RequestHeader("X-Sharer-User-Id") Long userId, @RequestBody ItemDto itemDto) {
+    public ItemDto update(@PathVariable Long itemId, @RequestHeader("X-Sharer-User-Id") Long userId,
+                          @RequestBody ItemDto itemDto) {
         isValid(userId);
         if (itemDto.getName() != null) {
             if (itemDto.getName().isBlank()) {

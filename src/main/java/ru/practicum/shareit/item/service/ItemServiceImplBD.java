@@ -24,17 +24,19 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import static ru.practicum.shareit.booking.model.Status.REJECTED;
+
 @Service
 @Slf4j
-public class ItemServiceRepository implements ItemService {
+public class ItemServiceImplBD implements ItemService {
     private final ItemRepository itemRepository;
     private final UserRepository userRepository;
     private final BookingRepository bookingRepository;
     private final CommentRepository commentRepository;
 
     @Autowired
-    public ItemServiceRepository(ItemRepository itemRepository, UserRepository userRepository,
-                                 BookingRepository bookingRepository, CommentRepository commentRepository) {
+    public ItemServiceImplBD(ItemRepository itemRepository, UserRepository userRepository,
+                             BookingRepository bookingRepository, CommentRepository commentRepository) {
         this.itemRepository = itemRepository;
         this.userRepository = userRepository;
         this.bookingRepository = bookingRepository;
@@ -43,8 +45,7 @@ public class ItemServiceRepository implements ItemService {
 
     @Override
     public ItemDto create(ItemDto itemDto, Long userId) {
-        User userById = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("Не найден пользователь с id: " + userId));
+        User userById = validUser(userId);
         Item item = ItemMapper.fromItemDto(itemDto);
         item.setOwner(userById);
         Item createdItem = itemRepository.save(item);
@@ -54,22 +55,24 @@ public class ItemServiceRepository implements ItemService {
 
     @Override
     public List<ItemDtoToGet> getAll(Long userId) {
-        userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("Не найден пользователь с id: " + userId));
+        validUser(userId);
         log.info("Получен список вещей пользователя с id = {}.", userId);
         List<Item> userItems = itemRepository.findByOwnerId(userId);
-        List<Booking> allBooKings = bookingRepository.findAllByItemIdIn(userItems.stream().map(Item::getId).collect(Collectors.toList()));
+        List<Booking> allBooKings = bookingRepository.findAllByItemIdIn(userItems.stream()
+                .map(Item::getId)
+                .collect(Collectors.toList()));
         List<ItemDtoToGet> itemDtos = new ArrayList<>();
         List<Comment> allComments = commentRepository.findAll();
 
         for (Item item : userItems) {
             Booking lastBooking = null;
             Booking nextBooking = null;
-            List<Booking> itemBookings = allBooKings.stream().filter(booking -> booking.getItem().getId()
-                    .equals(item.getId())).collect(Collectors.toList());
+            List<Booking> itemBookings = allBooKings.stream()
+                    .filter(booking -> booking.getItem().getId()
+                            .equals(item.getId())).collect(Collectors.toList());
             List<CommentDto> commentDtos = new ArrayList<>();
             for (Booking booking : itemBookings) {
-                if (!Objects.equals(booking.getStatus(), Status.REJECTED)) {
+                if (!Objects.equals(booking.getStatus(), REJECTED)) {
                     if (booking.getEnd().isBefore(LocalDateTime.now())) {
                         if ((lastBooking == null) || (booking.getEnd().isAfter(lastBooking.getEnd()))) {
                             lastBooking = booking;
@@ -93,15 +96,16 @@ public class ItemServiceRepository implements ItemService {
                     BookingMapper.toBookingDto(nextBooking), commentDtos);
             itemDtos.add(itemDtoToGet);
         }
-        return itemDtos.stream().sorted(Comparator.comparing(ItemDtoToGet::getName).reversed()).collect(Collectors.toList());
+        return itemDtos.stream()
+                .sorted(Comparator
+                        .comparing(ItemDtoToGet::getName)
+                        .reversed()).collect(Collectors.toList());
     }
 
     @Override
     public ItemDtoToGet getById(Long id, Long userId) {
-        userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("Не найден пользователь с id: " + userId));
-        Item itemById = itemRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Не найдена вещь с id: " + userId));
+        validUser(userId);
+        Item itemById = validItem(id);
         Booking lastBooking = null;
         Booking nextBooking = null;
         if (Objects.equals(itemById.getOwner().getId(), userId)) {
@@ -109,8 +113,9 @@ public class ItemServiceRepository implements ItemService {
             if (!listOfBookings.isEmpty()) {
                 for (Booking booking : listOfBookings) {
 
-                    if (!Objects.equals(booking.getStatus(), Status.REJECTED)) {
-                        if ((booking.getEnd().isBefore(LocalDateTime.now())) || (booking.getStart().isBefore(LocalDateTime.now()))) {
+                    if (!Objects.equals(booking.getStatus(), REJECTED)) {
+                        if ((booking.getEnd().isBefore(LocalDateTime.now())) ||
+                                (booking.getStart().isBefore(LocalDateTime.now()))) {
                             if (lastBooking == null || (booking.getEnd().isAfter(lastBooking.getEnd()))) {
                                 lastBooking = booking;
                             }
@@ -126,17 +131,17 @@ public class ItemServiceRepository implements ItemService {
         }
 
         List<Comment> comments = commentRepository.findAllByItemId(id);
-        List<CommentDto> commentsDto = comments.stream().map(CommentMapper::toCommentDto).collect(Collectors.toList());
+        List<CommentDto> commentsDto = comments.stream()
+                .map(CommentMapper::toCommentDto)
+                .collect(Collectors.toList());
         return ItemMapper.toItemDtoToGet(itemById, BookingMapper.toBookingDto(lastBooking),
                 BookingMapper.toBookingDto(nextBooking), commentsDto);
     }
 
     @Override
     public ItemDto update(Long itemId, Long userId, ItemDto itemDto) {
-        User userById = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("Не найден пользователь с id: " + userId));
-        Item itemById = itemRepository.findById(itemId)
-                .orElseThrow(() -> new EntityNotFoundException("Не найдена вещь с id: " + userId));
+        User userById = validUser(userId);
+        Item itemById = validItem(itemId);
         if (!Objects.equals(itemById.getOwner().getId(), userId)) {
             throw new EntityNotFoundException("Пользователь не является владельцем вещи.");
         }
@@ -157,10 +162,8 @@ public class ItemServiceRepository implements ItemService {
 
     @Override
     public void delete(Long id, Long userId) {
-        userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("Не найден пользователь с id: " + userId));
-        Item itemById = itemRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Не найдена вещь с id: " + userId));
+        validUser(userId);
+        Item itemById = validItem(id);
         if (!Objects.equals(itemById.getOwner().getId(), userId)) {
             throw new PersonalValidationException("Пользователь не является владельцем вещи.");
         }
@@ -169,19 +172,17 @@ public class ItemServiceRepository implements ItemService {
 
     @Override
     public List<ItemDto> search(String searchText, Long userId) {
-        userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("Не найден пользователь с id: " + userId));
+        validUser(userId);
         log.info("Составлен список вещей, найденных по ключевым словам '{}'.", searchText);
-        return itemRepository.searchItems(searchText.toLowerCase())
-                .stream().map(ItemMapper::toItemDto).collect(Collectors.toList());
+        return itemRepository.searchItems(searchText.toLowerCase()).stream()
+                .map(ItemMapper::toItemDto)
+                .collect(Collectors.toList());
     }
 
     @Override
     public CommentDto createComment(CommentDto commentDto, Long itemId, Long authorId) {
-        User author = userRepository.findById(authorId)
-                .orElseThrow(() -> new EntityNotFoundException("Не найден пользователь с id: " + authorId));
-        Item itemById = itemRepository.findById(itemId)
-                .orElseThrow(() -> new EntityNotFoundException("Не найдена вещь с id: " + authorId));
+        User author = validUser(authorId);
+        Item itemById = validItem(itemId);
         List<Booking> bookings = bookingRepository.findBookingByBookerIdAndItemId(authorId, itemId);
         if (bookings.isEmpty()) {
             throw new PersonalValidationException("Пользователь не брал вещь в аренду.");
@@ -189,7 +190,7 @@ public class ItemServiceRepository implements ItemService {
         Status elementStatus = null;
         LocalDateTime endTime = null;
         for (Booking element : bookings) {
-            if (!element.getStatus().equals(Status.REJECTED)) {
+            if (!Objects.equals(element.getStatus(), (REJECTED))) {
                 elementStatus = element.getStatus();
             }
             if (element.getEnd().isBefore(LocalDateTime.now())) {
@@ -205,5 +206,15 @@ public class ItemServiceRepository implements ItemService {
         Comment createdComment = CommentMapper.fromCommentDto(commentDto, itemById, author);
         createdComment.setCreated(LocalDateTime.now());
         return CommentMapper.toCommentDto(commentRepository.save(createdComment));
+    }
+
+    private User validUser(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("Не найден пользователь с id: " + userId));
+    }
+
+    private Item validItem(Long itemId) {
+        return itemRepository.findById(itemId)
+                .orElseThrow(() -> new EntityNotFoundException("Не найдена вещь с id: " + itemId));
     }
 }

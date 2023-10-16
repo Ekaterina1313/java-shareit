@@ -20,15 +20,18 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import static ru.practicum.shareit.booking.model.Status.*;
+
 @Service
 @Slf4j
-public class BookingServiceRepository implements BookingService {
+public class BookingServiceImplBD implements BookingService {
     private final BookingRepository bookingRepository;
     private final UserRepository userRepository;
     private final ItemRepository itemRepository;
 
     @Autowired
-    public BookingServiceRepository(BookingRepository bookingRepository, UserRepository userRepository, ItemRepository itemRepository) {
+    public BookingServiceImplBD(BookingRepository bookingRepository, UserRepository userRepository,
+                                ItemRepository itemRepository) {
         this.bookingRepository = bookingRepository;
         this.userRepository = userRepository;
         this.itemRepository = itemRepository;
@@ -36,10 +39,8 @@ public class BookingServiceRepository implements BookingService {
 
     @Override
     public BookingDto create(BookingDto bookingDto, Long userId) {
-        User userById = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("Не найден пользователь с id: " + userId));
-        Item itemById = itemRepository.findById(bookingDto.getItemId())
-                .orElseThrow(() -> new EntityNotFoundException("Не найдена вещь с id: " + userId));
+        User userById = validUser(userId);
+        Item itemById = validItem(bookingDto.getItemId());
         if (Objects.equals(itemById.getOwner().getId(), userId)) {
             throw new EntityNotFoundException("Вещь недоступна для бронирования.");
         }
@@ -47,7 +48,7 @@ public class BookingServiceRepository implements BookingService {
             throw new PersonalValidationException("Выбранная вещь недоступна для бронирования.");
         }
         Booking createdBooking = BookingMapper.fromBookingDto(bookingDto);
-        createdBooking.setStatus(Status.WAITING);
+        createdBooking.setStatus(WAITING);
         createdBooking.setBooker(userById);
         createdBooking.setItem(itemById);
         return BookingMapper.toBookingDto(bookingRepository.save(createdBooking));
@@ -55,34 +56,30 @@ public class BookingServiceRepository implements BookingService {
 
     @Override
     public BookingDto statusConfirm(Long bookingId, Long userId, Boolean approved) {
-        userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("Не найден пользователь с id: " + userId));
-        Booking bookingById = bookingRepository.findById(bookingId)
-                .orElseThrow(() -> new EntityNotFoundException("Не найдена бронь с id: " + userId));
-        if (bookingById.getStatus().equals(Status.APPROVED)) {
+        validUser(userId);
+        Booking bookingToConfirm = validBooking(bookingId);
+        if (bookingToConfirm.getStatus().equals(APPROVED)) {
             throw new PersonalValidationException("Нельзя изменить состояние брони после подтверждения.");
         }
-        Item itemById = bookingById.getItem();
+        Item itemById = bookingToConfirm.getItem();
         if (!Objects.equals(itemById.getOwner().getId(), userId)) {
             throw new EntityNotFoundException("Пользователь не является владельцем вещи.");
         }
 
         if (approved) {
-            bookingById.setStatus(Status.APPROVED);
+            bookingToConfirm.setStatus(APPROVED);
         } else {
-            bookingById.setStatus(Status.REJECTED);
+            bookingToConfirm.setStatus(REJECTED);
             itemById.setAvailable(true);
             itemRepository.save(itemById);
         }
-        return BookingMapper.toBookingDto(bookingRepository.save(bookingById));
+        return BookingMapper.toBookingDto(bookingRepository.save(bookingToConfirm));
     }
 
     @Override
     public BookingDto getById(Long id, Long userId) {
-        userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("Не найден пользователь с id: " + userId));
-        Booking bookingById = bookingRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Не найдена бронь с id: " + userId));
+        validUser(userId);
+        Booking bookingById = validBooking(id);
         Item itemById = bookingById.getItem();
         if ((!Objects.equals(bookingById.getBooker().getId(), userId)) &&
                 (!Objects.equals(itemById.getOwner().getId(), userId))) {
@@ -94,8 +91,7 @@ public class BookingServiceRepository implements BookingService {
 
     @Override
     public List<BookingDto> getBookingsByBookerId(String state, Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("Не найден пользователь с id: " + userId));
+        User user = validUser(userId);
         List<Booking> listOfBookings;
         if (state.equalsIgnoreCase("all")) {
             listOfBookings = bookingRepository.findByBooker(user);
@@ -106,9 +102,9 @@ public class BookingServiceRepository implements BookingService {
         } else if (state.equalsIgnoreCase("future")) {
             listOfBookings = bookingRepository.findByBookerFuture(user, LocalDateTime.now());
         } else if (state.equalsIgnoreCase("waiting")) {
-            listOfBookings = bookingRepository.findBookingsByBookerAndStatus(user, Status.WAITING);
+            listOfBookings = bookingRepository.findBookingsByBookerAndStatus(user, WAITING);
         } else if (state.equalsIgnoreCase("rejected")) {
-            listOfBookings = bookingRepository.findBookingsByBookerAndStatus(user, Status.REJECTED);
+            listOfBookings = bookingRepository.findBookingsByBookerAndStatus(user, REJECTED);
         } else {
             throw new PersonalValidationException("Unknown state: " + state);
         }
@@ -119,8 +115,7 @@ public class BookingServiceRepository implements BookingService {
 
     @Override
     public List<BookingDto> getBookingsByOwnerId(String state, Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("Не найден пользователь с id: " + userId));
+        User user = validUser(userId);
         List<Booking> listOfBookings;
 
         if (state.equalsIgnoreCase("all")) {
@@ -132,13 +127,30 @@ public class BookingServiceRepository implements BookingService {
         } else if (state.equalsIgnoreCase("future")) {
             listOfBookings = bookingRepository.findByOwnerFuture(user, LocalDateTime.now());
         } else if (state.equalsIgnoreCase("waiting")) {
-            listOfBookings = bookingRepository.findBookingsByOwnerAndStatus(user, Status.WAITING);
+            listOfBookings = bookingRepository.findBookingsByOwnerAndStatus(user, WAITING);
         } else if (state.equalsIgnoreCase("rejected")) {
-            listOfBookings = bookingRepository.findBookingsByOwnerAndStatus(user, Status.REJECTED);
+            listOfBookings = bookingRepository.findBookingsByOwnerAndStatus(user, REJECTED);
         } else {
             throw new PersonalValidationException("Unknown state: " + state);
         }
-        return listOfBookings.stream().map(BookingMapper::toBookingDto).collect(Collectors.toList());
+        return listOfBookings.stream()
+                .map(BookingMapper::toBookingDto)
+                .collect(Collectors.toList());
+    }
+
+    private User validUser(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("Не найден пользователь с id: " + userId));
+    }
+
+    private Item validItem(Long itemId) {
+        return itemRepository.findById(itemId)
+                .orElseThrow(() -> new EntityNotFoundException("Не найдена вещь с id: " + itemId));
+    }
+
+    private Booking validBooking(Long bookingId) {
+        return bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new EntityNotFoundException("Не найдена бронь с id: " + bookingId));
     }
 
     @Override

@@ -70,5 +70,4 @@ public class UserServiceImplBD implements UserService {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("Не найден пользователь с id: " + userId));
     }
-
 }

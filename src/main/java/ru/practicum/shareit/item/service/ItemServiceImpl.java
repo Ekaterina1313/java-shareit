@@ -99,4 +99,9 @@ public class ItemServiceImpl implements ItemService {
     public CommentDto createComment(CommentDto commentDto, Long itemId, Long authorId) {
         return null;
     }
+
+    @Override
+    public Item validItem(Long itemId) {
+        return null;
+    }
 }

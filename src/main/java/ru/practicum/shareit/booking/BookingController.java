@@ -20,7 +20,7 @@ public class BookingController {
     private final BookingService bookingService;
 
     @Autowired
-    public BookingController(@Qualifier("bookingServiceImplBD") BookingService bookingService) {
+    public BookingController(@Qualifier("bookingServiceImplBd") BookingService bookingService) {
         this.bookingService = bookingService;
     }
 

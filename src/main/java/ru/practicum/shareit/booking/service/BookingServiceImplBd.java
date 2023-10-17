@@ -2,6 +2,7 @@ package ru.practicum.shareit.booking.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.dao.BookingRepository;
 import ru.practicum.shareit.booking.dto.BookingDto;
@@ -11,8 +12,9 @@ import ru.practicum.shareit.exception.EntityNotFoundException;
 import ru.practicum.shareit.exception.PersonalValidationException;
 import ru.practicum.shareit.item.dao.ItemRepository;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.user.dao.UserRepository;
+import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.user.service.UserService;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -23,23 +25,26 @@ import static ru.practicum.shareit.booking.model.Status.*;
 
 @Service
 @Slf4j
-public class BookingServiceImplBD implements BookingService {
+public class BookingServiceImplBd implements BookingService {
     private final BookingRepository bookingRepository;
-    private final UserRepository userRepository;
+    private final UserService userService;
     private final ItemRepository itemRepository;
+    private final ItemService itemService;
 
     @Autowired
-    public BookingServiceImplBD(BookingRepository bookingRepository, UserRepository userRepository,
-                                ItemRepository itemRepository) {
+    public BookingServiceImplBd(BookingRepository bookingRepository,
+                                @Qualifier("userServiceImplBd") UserService userService, ItemRepository itemRepository,
+                                @Qualifier("itemServiceImplBd") ItemService itemService) {
         this.bookingRepository = bookingRepository;
-        this.userRepository = userRepository;
+        this.userService = userService;
         this.itemRepository = itemRepository;
+        this.itemService = itemService;
     }
 
     @Override
     public BookingDto create(BookingDto bookingDto, Long userId) {
-        User userById = validUser(userId);
-        Item itemById = validItem(bookingDto.getItemId());
+        User userById = userService.validUser(userId);
+        Item itemById = itemService.validItem(bookingDto.getItemId());
         if (Objects.equals(itemById.getOwner().getId(), userId)) {
             throw new EntityNotFoundException("Вещь недоступна для бронирования.");
         }
@@ -55,7 +60,7 @@ public class BookingServiceImplBD implements BookingService {
 
     @Override
     public BookingDto statusConfirm(Long bookingId, Long userId, Boolean approved) {
-        validUser(userId);
+        userService.validUser(userId);
         Booking bookingToConfirm = validBooking(bookingId);
         if (bookingToConfirm.getStatus().equals(APPROVED)) {
             throw new PersonalValidationException("Нельзя изменить состояние брони после подтверждения.");
@@ -77,7 +82,7 @@ public class BookingServiceImplBD implements BookingService {
 
     @Override
     public BookingDto getById(Long id, Long userId) {
-        validUser(userId);
+        userService.validUser(userId);
         Booking bookingById = validBooking(id);
         Item itemById = bookingById.getItem();
         if ((!Objects.equals(bookingById.getBooker().getId(), userId)) &&
@@ -90,7 +95,7 @@ public class BookingServiceImplBD implements BookingService {
 
     @Override
     public List<BookingDto> getBookingsByBookerId(String state, Long userId) {
-        User user = validUser(userId);
+        User user = userService.validUser(userId);
         List<Booking> listOfBookings;
         if (state.equalsIgnoreCase("all")) {
             listOfBookings = bookingRepository.findByBooker(user);
@@ -114,7 +119,7 @@ public class BookingServiceImplBD implements BookingService {
 
     @Override
     public List<BookingDto> getBookingsByOwnerId(String state, Long userId) {
-        User user = validUser(userId);
+        User user = userService.validUser(userId);
         List<Booking> listOfBookings;
 
         if (state.equalsIgnoreCase("all")) {
@@ -135,16 +140,6 @@ public class BookingServiceImplBD implements BookingService {
         return listOfBookings.stream()
                 .map(BookingMapper::toBookingDto)
                 .collect(Collectors.toList());
-    }
-
-    private User validUser(Long userId) {
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("Не найден пользователь с id: " + userId));
-    }
-
-    private Item validItem(Long itemId) {
-        return itemRepository.findById(itemId)
-                .orElseThrow(() -> new EntityNotFoundException("Не найдена вещь с id: " + itemId));
     }
 
     private Booking validBooking(Long bookingId) {

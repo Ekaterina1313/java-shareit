@@ -14,11 +14,11 @@ import java.util.stream.Collectors;
 
 @Service
 @Slf4j
-public class UserServiceImplBD implements UserService {
+public class UserServiceImplBd implements UserService {
     private final UserRepository userRepository;
 
     @Autowired
-    public UserServiceImplBD(UserRepository userRepository) {
+    public UserServiceImplBd(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 
@@ -44,7 +44,7 @@ public class UserServiceImplBD implements UserService {
     @Override
     public UserDto update(Long id, UserDto userDto) {
         User userById = validUser(id);
-        if (userRepository.isExistEmail(userDto.getEmail())) {
+        if (userRepository.existsByEmail(userDto.getEmail())) {
             if (!userDto.getEmail().equals(userById.getEmail())) {
                 throw new RuntimeException("Адрес электронной почты уже используется другим пользователем.");
             }
@@ -66,7 +66,8 @@ public class UserServiceImplBD implements UserService {
         userRepository.deleteById(id);
     }
 
-    private User validUser(Long userId) {
+    @Override
+    public User validUser(Long userId) {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("Не найден пользователь с id: " + userId));
     }

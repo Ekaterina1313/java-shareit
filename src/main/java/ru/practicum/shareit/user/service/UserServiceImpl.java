@@ -66,6 +66,11 @@ public class UserServiceImpl implements UserService {
         userDao.delete(id);
     }
 
+    @Override
+    public User validUser(Long userId) {
+        return null;
+    }
+
     private boolean isContainEmail(String email) {
         return userDao.isContainEmail(email);
     }

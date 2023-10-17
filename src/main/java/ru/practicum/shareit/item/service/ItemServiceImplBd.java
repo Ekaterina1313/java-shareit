@@ -2,6 +2,7 @@ package ru.practicum.shareit.item.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.dao.BookingRepository;
 import ru.practicum.shareit.booking.dto.BookingMapper;
@@ -14,8 +15,8 @@ import ru.practicum.shareit.item.dao.ItemRepository;
 import ru.practicum.shareit.item.dto.*;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.user.dao.UserRepository;
 import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.user.service.UserService;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -28,24 +29,25 @@ import static ru.practicum.shareit.booking.model.Status.REJECTED;
 
 @Service
 @Slf4j
-public class ItemServiceImplBD implements ItemService {
+public class ItemServiceImplBd implements ItemService {
     private final ItemRepository itemRepository;
-    private final UserRepository userRepository;
+    private final UserService userService;
     private final BookingRepository bookingRepository;
     private final CommentRepository commentRepository;
 
     @Autowired
-    public ItemServiceImplBD(ItemRepository itemRepository, UserRepository userRepository,
+    public ItemServiceImplBd(ItemRepository itemRepository,
+                             @Qualifier("userServiceImplBd") UserService userService,
                              BookingRepository bookingRepository, CommentRepository commentRepository) {
         this.itemRepository = itemRepository;
-        this.userRepository = userRepository;
+        this.userService = userService;
         this.bookingRepository = bookingRepository;
         this.commentRepository = commentRepository;
     }
 
     @Override
     public ItemDto create(ItemDto itemDto, Long userId) {
-        User userById = validUser(userId);
+        User userById = userService.validUser(userId);
         Item item = ItemMapper.fromItemDto(itemDto);
         item.setOwner(userById);
         Item createdItem = itemRepository.save(item);
@@ -55,7 +57,7 @@ public class ItemServiceImplBD implements ItemService {
 
     @Override
     public List<ItemDtoToGet> getAll(Long userId) {
-        validUser(userId);
+        userService.validUser(userId);
         log.info("Получен список вещей пользователя с id = {}.", userId);
         List<Item> userItems = itemRepository.findByOwnerId(userId);
         List<Booking> allBooKings = bookingRepository.findAllByItemIdIn(userItems.stream()
@@ -104,7 +106,7 @@ public class ItemServiceImplBD implements ItemService {
 
     @Override
     public ItemDtoToGet getById(Long id, Long userId) {
-        validUser(userId);
+        userService.validUser(userId);
         Item itemById = validItem(id);
         Booking lastBooking = null;
         Booking nextBooking = null;
@@ -140,7 +142,7 @@ public class ItemServiceImplBD implements ItemService {
 
     @Override
     public ItemDto update(Long itemId, Long userId, ItemDto itemDto) {
-        User userById = validUser(userId);
+        User userById = userService.validUser(userId);
         Item itemById = validItem(itemId);
         if (!Objects.equals(itemById.getOwner().getId(), userId)) {
             throw new EntityNotFoundException("Пользователь не является владельцем вещи.");
@@ -162,7 +164,7 @@ public class ItemServiceImplBD implements ItemService {
 
     @Override
     public void delete(Long id, Long userId) {
-        validUser(userId);
+        userService.validUser(userId);
         Item itemById = validItem(id);
         if (!Objects.equals(itemById.getOwner().getId(), userId)) {
             throw new PersonalValidationException("Пользователь не является владельцем вещи.");
@@ -172,7 +174,7 @@ public class ItemServiceImplBD implements ItemService {
 
     @Override
     public List<ItemDto> search(String searchText, Long userId) {
-        validUser(userId);
+        userService.validUser(userId);
         log.info("Составлен список вещей, найденных по ключевым словам '{}'.", searchText);
         return itemRepository.searchItems(searchText.toLowerCase()).stream()
                 .map(ItemMapper::toItemDto)
@@ -181,7 +183,7 @@ public class ItemServiceImplBD implements ItemService {
 
     @Override
     public CommentDto createComment(CommentDto commentDto, Long itemId, Long authorId) {
-        User author = validUser(authorId);
+        User author = userService.validUser(authorId);
         Item itemById = validItem(itemId);
         List<Booking> bookings = bookingRepository.findBookingByBookerIdAndItemId(authorId, itemId);
         if (bookings.isEmpty()) {
@@ -208,12 +210,8 @@ public class ItemServiceImplBD implements ItemService {
         return CommentMapper.toCommentDto(commentRepository.save(createdComment));
     }
 
-    private User validUser(Long userId) {
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("Не найден пользователь с id: " + userId));
-    }
-
-    private Item validItem(Long itemId) {
+    @Override
+    public Item validItem(Long itemId) {
         return itemRepository.findById(itemId)
                 .orElseThrow(() -> new EntityNotFoundException("Не найдена вещь с id: " + itemId));
     }

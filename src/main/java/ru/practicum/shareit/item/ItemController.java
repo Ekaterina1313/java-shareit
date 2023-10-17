@@ -21,7 +21,7 @@ public class ItemController {
     private final ItemService itemService;
 
     @Autowired
-    public ItemController(@Qualifier("itemServiceImplBD") ItemService itemService) {
+    public ItemController(@Qualifier("itemServiceImplBd") ItemService itemService) {
         this.itemService = itemService;
     }
 

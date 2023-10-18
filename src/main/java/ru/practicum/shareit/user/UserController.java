@@ -2,8 +2,9 @@ package ru.practicum.shareit.user;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.exception.BadRequestException;
+import ru.practicum.shareit.exception.PersonalValidationException;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.service.UserService;
 
@@ -17,7 +18,7 @@ public class UserController {
     private final UserService userService;
 
     @Autowired
-    public UserController(UserService userService) {
+    public UserController(@Qualifier("userServiceImplBd") UserService userService) {
         this.userService = userService;
     }
 
@@ -31,35 +32,38 @@ public class UserController {
     @PostMapping
     public UserDto create(@RequestBody UserDto userDto) {
         if (userDto.getName() == null || userDto.getName().isEmpty()) {
-            throw new BadRequestException("Имя не должно быть пустым.");
-        } else if (userDto.getEmail() == null || userDto.getEmail().isEmpty()) {
-            throw new BadRequestException("Адрес электронной почты не должен быть пустым.");
+            throw new PersonalValidationException("Имя не должно быть пустым.");
+        } else if (userDto.getEmail() == null || userDto.getEmail().isBlank()) {
+            throw new PersonalValidationException("Адрес электронной почты не должен быть пустым.");
         } else if (!userDto.getEmail().contains("@")) {
-            throw new BadRequestException("Некорректный формат e-mail. Адрес электронной почты должен содержать символ '@'.");
+            throw new PersonalValidationException("Некорректный формат e-mail. " +
+                    "Адрес электронной почты должен содержать символ '@'.");
         }
         log.info("Поступил запрос на создание пользователя {} c id = {}.", userDto.getName(), userDto.getId());
         return userService.create(userDto);
     }
 
     @GetMapping("/{id}")
-    public UserDto getById(@PathVariable long id) {
+    public UserDto getById(@PathVariable Long id) {
         log.info("Поступил запрос на получение пользователя с id = {}.", id);
         return userService.getById(id);
     }
 
     @PatchMapping("/{id}")
-    public UserDto update(@PathVariable long id, @RequestBody UserDto userDto) {
+    public UserDto update(@PathVariable Long id, @RequestBody UserDto userDto) {
         if (userDto.getEmail() != null) {
             if (!userDto.getEmail().contains("@")) {
-                throw new BadRequestException("Некорректный формат e-mail. Адрес электронной почты должен содержать символ '@'.");
+                throw new PersonalValidationException("Некорректный формат e-mail. " +
+                        "Адрес электронной почты должен содержать символ '@'.");
             }
         }
         if (userDto.getName() != null) {
             if (userDto.getName().equals("")) {
-                throw new BadRequestException("Поле не должно быть пустым.");
+                throw new PersonalValidationException("Поле не должно быть пустым.");
             }
         }
-        log.info("Поступил запрос на обновление информации о пользователе {} c id = {}.", userDto.getName(), userDto.getId());
+        log.info("Поступил запрос на обновление информации о пользователе {} c id = {}.",
+                userDto.getName(), userDto.getId());
         return userService.update(id, userDto);
     }
 

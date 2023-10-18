@@ -2,8 +2,9 @@ package ru.practicum.shareit.request;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.exception.BadRequestException;
+import ru.practicum.shareit.exception.PersonalValidationException;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
 import ru.practicum.shareit.request.service.ItemRequestService;
 
@@ -17,7 +18,7 @@ public class ItemRequestController {
     private final ItemRequestService itemRequestService;
 
     @Autowired
-    public ItemRequestController(ItemRequestService itemRequestService) {
+    public ItemRequestController(@Qualifier("itemRequestServiceRepository") ItemRequestService itemRequestService) {
         this.itemRequestService = itemRequestService;
     }
 
@@ -26,7 +27,7 @@ public class ItemRequestController {
                                  @RequestHeader("X-Sharer-User-Id") Long userId) {
         isValidUser(userId);
         if (itemRequestDto.getDescription() == null || itemRequestDto.getDescription().isBlank()) {
-            throw new BadRequestException("Поле с описанием не должно быть пустым.");
+            throw new PersonalValidationException("Поле с описанием не должно быть пустым.");
         }
         return itemRequestService.create(itemRequestDto, userId);
     }
@@ -49,7 +50,7 @@ public class ItemRequestController {
         isValidUser(userId);
         if (itemRequestDto.getDescription() == null) {
             if (itemRequestDto.getDescription().isBlank()) {
-                throw new BadRequestException("Поле с описанием не должно быть пустым.");
+                throw new PersonalValidationException("Поле с описанием не должно быть пустым.");
             }
         }
         return itemRequestService.update(id, userId, itemRequestDto);
@@ -63,7 +64,7 @@ public class ItemRequestController {
 
     private boolean isValidUser(Long userId) {
         if (userId == null) {
-            throw new BadRequestException("Необходимо указать id пользователя в заголовке запроса.");
+            throw new PersonalValidationException("Необходимо указать id пользователя в заголовке запроса.");
         }
         return true;
     }

@@ -5,11 +5,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.EntityNotFoundException;
 import ru.practicum.shareit.exception.PersonalValidationException;
-import ru.practicum.shareit.request.dao.ItemRequestDao;
+import ru.practicum.shareit.request.dao.ItemRequestRepository;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
 import ru.practicum.shareit.request.dto.ItemRequestMapper;
 import ru.practicum.shareit.request.model.ItemRequest;
-import ru.practicum.shareit.user.dao.UserDao;
+import ru.practicum.shareit.user.dao.UserRepository;
 import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
@@ -19,66 +19,69 @@ import java.util.stream.Collectors;
 
 @Service
 @Slf4j
-public class ItemRequestServiceImpl implements ItemRequestService {
-    private final ItemRequestDao itemRequestDao;
-    private final UserDao userDao;
+public class ItemRequestServiceRepository implements ItemRequestService {
+    private final UserRepository userRepository;
+    private final ItemRequestRepository itemRequestRepository;
 
     @Autowired
-    public ItemRequestServiceImpl(ItemRequestDao itemRequestDao, UserDao userDao) {
-        this.itemRequestDao = itemRequestDao;
-        this.userDao = userDao;
+    public ItemRequestServiceRepository(UserRepository userRepository, ItemRequestRepository itemRequestRepository) {
+        this.userRepository = userRepository;
+        this.itemRequestRepository = itemRequestRepository;
     }
 
     @Override
     public ItemRequestDto create(ItemRequestDto itemRequestDto, Long userId) {
-        User userById = userDao.getById(userId)
+        User userById = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("Не найден пользователь с id: " + userId));
         ItemRequest itemRequest = ItemRequestMapper.fromItemRequestDto(itemRequestDto);
         itemRequest.setCreated(LocalDateTime.now());
         itemRequest.setRequestor(userById);
-        return ItemRequestMapper.toItemRequestDto(itemRequestDao.create(itemRequest));
+        return ItemRequestMapper.toItemRequestDto(itemRequestRepository.save(itemRequest));
     }
 
     @Override
     public List<ItemRequestDto> getAll(Long userId) {
-        userDao.getById(userId)
+        userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("Не найден пользователь с id: " + userId));
-        return itemRequestDao.getAll(userId).stream()
+        return itemRequestRepository.findAll().stream()
                 .map(ItemRequestMapper::toItemRequestDto)
                 .collect(Collectors.toList());
     }
 
     @Override
     public ItemRequestDto getById(Long id, Long userId) {
-        userDao.getById(id)
+        userRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Не найден пользователь с id: " + userId));
-        return ItemRequestMapper.toItemRequestDto(itemRequestDao.getById(id).get());
+        ItemRequest itemRequest = itemRequestRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Не найден пользователь с id: " + userId));
+        ;
+        return ItemRequestMapper.toItemRequestDto(itemRequest);
     }
 
     @Override
     public ItemRequestDto update(Long id, Long userId, ItemRequestDto itemRequestDto) {
-        ItemRequest itemRequest2 = itemRequestDao.getById(id)
+        ItemRequest itemRequest2 = itemRequestRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Не найден запрос с id: " + id));
-        User userById = userDao.getById(id)
+        userRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Не найден пользователь с id: " + id));
         if (!Objects.equals(itemRequest2.getRequestor().getId(), userId)) {
             throw new PersonalValidationException("Нельзя изменить чужой запрос.");
         }
-        itemRequestDto.setId(id);
-        ItemRequest itemRequest = ItemRequestMapper.fromItemRequestDto(itemRequestDto);
-        itemRequest.setRequestor(userById);
-        return ItemRequestMapper.toItemRequestDto(itemRequestDao.update(itemRequest));
+        if (!itemRequestDto.getDescription().isBlank() || itemRequestDto.getDescription() != null) {
+            itemRequest2.setDescription(itemRequestDto.getDescription());
+        }
+        return ItemRequestMapper.toItemRequestDto(itemRequestRepository.save(itemRequest2));
     }
 
     @Override
     public void delete(Long id, Long userId) {
-        userDao.getById(id)
+        userRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Не найден пользователь с id: " + userId));
-        ItemRequest itemRequest2 = itemRequestDao.getById(id)
+        ItemRequest itemRequest2 = itemRequestRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Не найден запрос с id: " + id));
         if (!Objects.equals(itemRequest2.getRequestor().getId(), userId)) {
             throw new PersonalValidationException("Пользователь с id = " + userId + " не может удалить чужой запрос.");
         }
-        itemRequestDao.delete(id);
+        itemRequestRepository.deleteById(id);
     }
 }

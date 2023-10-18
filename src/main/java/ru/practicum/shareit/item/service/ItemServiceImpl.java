@@ -3,10 +3,12 @@ package ru.practicum.shareit.item.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.exception.BadRequestException;
 import ru.practicum.shareit.exception.EntityNotFoundException;
+import ru.practicum.shareit.exception.PersonalValidationException;
 import ru.practicum.shareit.item.dao.ItemDao;
+import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemDtoToGet;
 import ru.practicum.shareit.item.dto.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.dao.UserDao;
@@ -40,20 +42,20 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemDto> getAll(Long userId) {
+    public List<ItemDtoToGet> getAll(Long userId) {
         userDao.getById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("Не найден пользователь с id: " + userId));
         log.info("Получен список вещей пользователя с id = {}.", userId);
-        return itemDao.getAll(userId).stream().map(ItemMapper::toItemDto).collect(Collectors.toList());
+        return null;
     }
 
     @Override
-    public ItemDto getById(Long id, Long userId) {
+    public ItemDtoToGet getById(Long id, Long userId) {
         userDao.getById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("Не найден пользователь с id: " + userId));
         Item itemById = itemDao.getById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Не найдена вещь с id: " + userId));
-        return ItemMapper.toItemDto(itemById);
+        return null;
     }
 
     @Override
@@ -80,7 +82,7 @@ public class ItemServiceImpl implements ItemService {
         Item itemById = itemDao.getById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Не найдена вещь с id: " + userId));
         if (!Objects.equals(itemById.getOwner().getId(), userId)) {
-            throw new BadRequestException("Пользователь не является владельцем вещи.");
+            throw new PersonalValidationException("Пользователь не является владельцем вещи.");
         }
         itemDao.delete(id);
     }
@@ -91,5 +93,15 @@ public class ItemServiceImpl implements ItemService {
                 .orElseThrow(() -> new EntityNotFoundException("Не найден пользователь с id: " + userId));
         log.info("Составлен список вещей, найденных по ключевым словам '{}'.", searchText);
         return itemDao.search(searchText, userId).stream().map(ItemMapper::toItemDto).collect(Collectors.toList());
+    }
+
+    @Override
+    public CommentDto createComment(CommentDto commentDto, Long itemId, Long authorId) {
+        return null;
+    }
+
+    @Override
+    public Item validItem(Long itemId) {
+        return null;
     }
 }

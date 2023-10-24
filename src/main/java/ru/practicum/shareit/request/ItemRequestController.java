@@ -18,7 +18,7 @@ public class ItemRequestController {
     private final ItemRequestService itemRequestService;
 
     @Autowired
-    public ItemRequestController(@Qualifier("itemRequestServiceRepository") ItemRequestService itemRequestService) {
+    public ItemRequestController(@Qualifier("itemRequestServiceImplBd") ItemRequestService itemRequestService) {
         this.itemRequestService = itemRequestService;
     }
 

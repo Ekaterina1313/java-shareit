@@ -19,12 +19,12 @@ import java.util.stream.Collectors;
 
 @Service
 @Slf4j
-public class ItemRequestServiceRepository implements ItemRequestService {
+public class ItemRequestServiceImplBd implements ItemRequestService {
     private final UserRepository userRepository;
     private final ItemRequestRepository itemRequestRepository;
 
     @Autowired
-    public ItemRequestServiceRepository(UserRepository userRepository, ItemRequestRepository itemRequestRepository) {
+    public ItemRequestServiceImplBd(UserRepository userRepository, ItemRequestRepository itemRequestRepository) {
         this.userRepository = userRepository;
         this.itemRequestRepository = itemRequestRepository;
     }

@@ -13,7 +13,8 @@ public class ItemMapper {
                 item.getId(),
                 item.getName(),
                 item.getDescription(),
-                item.getAvailable()
+                item.getAvailable(),
+                item.getRequestId()
         );
     }
 
@@ -23,6 +24,7 @@ public class ItemMapper {
                 itemDto.getName(),
                 itemDto.getDescription(),
                 itemDto.getAvailable(),
+                itemDto.getRequestId(),
                 new User()
         );
     }
@@ -36,6 +38,16 @@ public class ItemMapper {
                 lastBooking,
                 nextBooking,
                 comments
+        );
+    }
+
+    public static ItemDtoForRequest toItemDtoForRequest(Item item) {
+        return new ItemDtoForRequest(
+              item.getId(),
+              item.getName(),
+                item.getDescription(),
+                item.getRequestId(),
+                item.getAvailable()
         );
     }
 }

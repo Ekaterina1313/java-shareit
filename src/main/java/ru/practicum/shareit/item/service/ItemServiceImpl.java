@@ -42,7 +42,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemDtoToGet> getAll(Long userId) {
+    public List<ItemDtoToGet> getAll(Long userId, int from, int size) {
         userDao.getById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("Не найден пользователь с id: " + userId));
         log.info("Получен список вещей пользователя с id = {}.", userId);
@@ -88,7 +88,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemDto> search(String searchText, Long userId) {
+    public List<ItemDto> search(String searchText, int from, int size, Long userId) {
         userDao.getById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("Не найден пользователь с id: " + userId));
         log.info("Составлен список вещей, найденных по ключевым словам '{}'.", searchText);

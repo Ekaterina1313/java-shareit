@@ -69,21 +69,37 @@ public class BookingController {
 
     @GetMapping()
     public List<BookingDto> getBookingsByBookerId(@RequestParam(value = "state", defaultValue = "ALL") String state,
+                                                  @RequestParam(name = "from", defaultValue = "0") int from,
+                                                  @RequestParam(name = "size", defaultValue = "10") int size,
                                                   @RequestHeader("X-Sharer-User-Id") Long userId) {
         isValid(userId);
-        return bookingService.getBookingsByBookerId(state, userId);
+        isValidPagination(from, size);
+        return bookingService.getBookingsByBookerId(state, from, size, userId);
     }
 
     @GetMapping("/owner")
     public List<BookingDto> getBookingsByOwnerId(@RequestParam(value = "state", defaultValue = "ALL") String state,
+                                                 @RequestParam(name = "from", defaultValue = "0") int from,
+                                                 @RequestParam(name = "size", defaultValue = "10") int size,
                                                  @RequestHeader("X-Sharer-User-Id") Long userId) {
         isValid(userId);
-        return bookingService.getBookingsByOwnerId(state, userId);
+        isValidPagination(from, size);
+        return bookingService.getBookingsByOwnerId(state, from, size, userId);
     }
 
     private boolean isValid(Long userId) {
         if (userId == null) {
             throw new PersonalValidationException("Необходимо указать id пользователя в заголовке запроса.");
+        }
+        return true;
+    }
+
+    private boolean isValidPagination(int from, int size) {
+        if (from < 0 ) {
+            throw new PersonalValidationException("Параметр 'from' не должен принимать отрицательное значение.");
+        }
+        if (size <= 0) {
+            throw new PersonalValidationException("Параметр 'size' не должен принимать пустое или отрицательное значение.");
         }
         return true;
     }

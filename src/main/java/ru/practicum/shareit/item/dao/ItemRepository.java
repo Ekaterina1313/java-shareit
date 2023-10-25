@@ -12,4 +12,9 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
     List<Item> searchItems(String searchText);
 
     List<Item> findByOwnerId(Long ownerId);
+
+    @Query("SELECT i FROM Item i WHERE i.requestId IN :requestIds")
+    List<Item> findByRequestIds(List<Long> requestIds);
+
+    List<Item> findByRequestId(Long requestId);
 }

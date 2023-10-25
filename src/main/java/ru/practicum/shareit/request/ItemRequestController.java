@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.exception.PersonalValidationException;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
+import ru.practicum.shareit.request.dto.ItemRequestDtoFull;
 import ru.practicum.shareit.request.service.ItemRequestService;
 
 import java.util.List;
@@ -22,9 +23,9 @@ public class ItemRequestController {
         this.itemRequestService = itemRequestService;
     }
 
-    @GetMapping
-    public ItemRequestDto create(@RequestBody ItemRequestDto itemRequestDto,
-                                 @RequestHeader("X-Sharer-User-Id") Long userId) {
+    @PostMapping
+    public ItemRequestDtoFull create(@RequestBody ItemRequestDto itemRequestDto,
+                                     @RequestHeader("X-Sharer-User-Id") Long userId) {
         isValidUser(userId);
         if (itemRequestDto.getDescription() == null || itemRequestDto.getDescription().isBlank()) {
             throw new PersonalValidationException("Поле с описанием не должно быть пустым.");
@@ -32,19 +33,27 @@ public class ItemRequestController {
         return itemRequestService.create(itemRequestDto, userId);
     }
 
-    @PostMapping
-    public List<ItemRequestDto> getAll(@RequestHeader("X-Sharer-User-Id") Long userId) {
+    @GetMapping
+    public List<ItemRequestDtoFull> getAllByOwner(@RequestHeader("X-Sharer-User-Id") Long userId) {
         isValidUser(userId);
-        return itemRequestService.getAll(userId);
+        return itemRequestService.getAllByOwner(userId);
     }
 
-    @GetMapping("/{id}")
-    public ItemRequestDto getById(@PathVariable Long id, @RequestHeader("X-Sharer-User-Id") Long userId) {
+    @GetMapping("/all")
+    public List<ItemRequestDtoFull> getAllByOthers(@RequestHeader("X-Sharer-User-Id") Long userId,
+                                               @RequestParam(name = "from", defaultValue = "0") int from,
+                                               @RequestParam(name = "size", defaultValue = "10") int size) {
         isValidUser(userId);
-        return itemRequestService.getById(id, userId);
+        return itemRequestService.getAllByOthers(userId, from, size);
     }
 
-    @PatchMapping("/{id}")
+    @GetMapping("/{requestId}")
+    public ItemRequestDtoFull getById(@PathVariable Long requestId, @RequestHeader("X-Sharer-User-Id") Long userId) {
+        isValidUser(userId);
+        return itemRequestService.getById(requestId, userId);
+    }
+
+    /*@PatchMapping("/{id}")
     public ItemRequestDto update(@RequestBody Long id, @RequestHeader("X-Sharer-User-Id") Long userId,
                                  @RequestBody ItemRequestDto itemRequestDto) {
         isValidUser(userId);
@@ -54,7 +63,7 @@ public class ItemRequestController {
             }
         }
         return itemRequestService.update(id, userId, itemRequestDto);
-    }
+    }*/
 
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id, @RequestHeader("X-Sharer-User-Id") Long userId) {

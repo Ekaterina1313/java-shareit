@@ -105,12 +105,12 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<BookingDto> getBookingsByBookerId(String state, Long userId) {
+    public List<BookingDto> getBookingsByBookerId(String state, int from, int size, Long userId) {
         return null;
     }
 
     @Override
-    public List<BookingDto> getBookingsByOwnerId(String state, Long userId) {
+    public List<BookingDto> getBookingsByOwnerId(String state, int from, int size, Long userId) {
         return null;
     }
 }

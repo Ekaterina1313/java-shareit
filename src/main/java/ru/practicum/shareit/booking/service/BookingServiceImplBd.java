@@ -94,7 +94,7 @@ public class BookingServiceImplBd implements BookingService {
 
 
     @Override
-    public List<BookingDto> getBookingsByBookerId(String state, Long userId) {
+    public List<BookingDto> getBookingsByBookerId(String state, int from, int size, Long userId) {
         User user = userService.validUser(userId);
         List<Booking> listOfBookings;
         if (state.equalsIgnoreCase("all")) {
@@ -113,12 +113,14 @@ public class BookingServiceImplBd implements BookingService {
             throw new PersonalValidationException("Unknown state: " + state);
         }
         return listOfBookings.stream()
+                .skip(from)
+                .limit(size)
                 .map(BookingMapper::toBookingDto)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public List<BookingDto> getBookingsByOwnerId(String state, Long userId) {
+    public List<BookingDto> getBookingsByOwnerId(String state, int from, int size, Long userId) {
         User user = userService.validUser(userId);
         List<Booking> listOfBookings;
 
@@ -138,6 +140,8 @@ public class BookingServiceImplBd implements BookingService {
             throw new PersonalValidationException("Unknown state: " + state);
         }
         return listOfBookings.stream()
+                .skip(from)
+                .limit(size)
                 .map(BookingMapper::toBookingDto)
                 .collect(Collectors.toList());
     }

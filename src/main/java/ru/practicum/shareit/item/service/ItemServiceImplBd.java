@@ -56,10 +56,13 @@ public class ItemServiceImplBd implements ItemService {
     }
 
     @Override
-    public List<ItemDtoToGet> getAll(Long userId) {
+    public List<ItemDtoToGet> getAll(Long userId, int from, int size) {
         userService.validUser(userId);
         log.info("Получен список вещей пользователя с id = {}.", userId);
+
         List<Item> userItems = itemRepository.findByOwnerId(userId);
+        userItems = userItems.stream().skip(from).limit(size).collect(Collectors.toList());
+
         List<Booking> allBooKings = bookingRepository.findAllByItemIdIn(userItems.stream()
                 .map(Item::getId)
                 .collect(Collectors.toList()));
@@ -173,10 +176,12 @@ public class ItemServiceImplBd implements ItemService {
     }
 
     @Override
-    public List<ItemDto> search(String searchText, Long userId) {
+    public List<ItemDto> search(String searchText, int from, int size, Long userId) {
         userService.validUser(userId);
         log.info("Составлен список вещей, найденных по ключевым словам '{}'.", searchText);
         return itemRepository.searchItems(searchText.toLowerCase()).stream()
+                .skip(from)
+                .limit(size)
                 .map(ItemMapper::toItemDto)
                 .collect(Collectors.toList());
     }

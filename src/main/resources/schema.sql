@@ -30,8 +30,10 @@ CREATE TABLE IF NOT EXISTS items
     description VARCHAR(1000),
     available   BOOLEAN,
     owner_id    BIGINT,
+    request_id BIGINT,
     CONSTRAINT pk_item PRIMARY KEY (id),
-    CONSTRAINT fk_item_owner FOREIGN KEY (owner_id) REFERENCES users (id)
+    CONSTRAINT fk_item_owner FOREIGN KEY (owner_id) REFERENCES users (id),
+    CONSTRAINT fk_request_id FOREIGN KEY (request_id) REFERENCES item_request (id)
 );
 
 

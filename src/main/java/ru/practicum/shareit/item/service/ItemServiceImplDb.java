@@ -29,14 +29,14 @@ import static ru.practicum.shareit.booking.model.Status.REJECTED;
 
 @Service
 @Slf4j
-public class ItemServiceImplBd implements ItemService {
+public class ItemServiceImplDb implements ItemService {
     private final ItemRepository itemRepository;
     private final UserService userService;
     private final BookingRepository bookingRepository;
     private final CommentRepository commentRepository;
 
     @Autowired
-    public ItemServiceImplBd(ItemRepository itemRepository,
+    public ItemServiceImplDb(ItemRepository itemRepository,
                              @Qualifier("userServiceImplBd") UserService userService,
                              BookingRepository bookingRepository, CommentRepository commentRepository) {
         this.itemRepository = itemRepository;

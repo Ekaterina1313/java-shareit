@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 public class UserServiceImplBd implements UserService {
-    private final UserRepository userRepository;
+    private UserRepository userRepository;
 
     @Autowired
     public UserServiceImplBd(UserRepository userRepository) {
@@ -71,4 +71,9 @@ public class UserServiceImplBd implements UserService {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("Не найден пользователь с id: " + userId));
     }
+
+    /*@Override
+    public void setUserRepository(UserRepository userRepository) {
+       this.userRepository = userRepository;
+    }*/
 }

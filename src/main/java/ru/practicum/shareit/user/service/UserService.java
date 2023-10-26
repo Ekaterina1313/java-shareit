@@ -1,5 +1,6 @@
 package ru.practicum.shareit.user.service;
 
+import ru.practicum.shareit.user.dao.UserRepository;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 
@@ -17,4 +18,6 @@ public interface UserService {
     void delete(Long id);
 
     User validUser(Long userId);
+
+    // void setUserRepository(UserRepository userRepository);
 }

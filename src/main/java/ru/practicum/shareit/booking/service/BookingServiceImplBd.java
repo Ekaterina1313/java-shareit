@@ -34,7 +34,7 @@ public class BookingServiceImplBd implements BookingService {
     @Autowired
     public BookingServiceImplBd(BookingRepository bookingRepository,
                                 @Qualifier("userServiceImplBd") UserService userService, ItemRepository itemRepository,
-                                @Qualifier("itemServiceImplBd") ItemService itemService) {
+                                @Qualifier("itemServiceImplDb") ItemService itemService) {
         this.bookingRepository = bookingRepository;
         this.userService = userService;
         this.itemRepository = itemRepository;

@@ -40,14 +40,4 @@ public class ItemMapper {
                 comments
         );
     }
-
-    public static ItemDtoForRequest toItemDtoForRequest(Item item) {
-        return new ItemDtoForRequest(
-              item.getId(),
-              item.getName(),
-                item.getDescription(),
-                item.getRequestId(),
-                item.getAvailable()
-        );
-    }
 }

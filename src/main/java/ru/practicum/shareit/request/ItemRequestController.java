@@ -44,6 +44,12 @@ public class ItemRequestController {
                                                @RequestParam(name = "from", defaultValue = "0") int from,
                                                @RequestParam(name = "size", defaultValue = "10") int size) {
         isValidUser(userId);
+        if (from < 0) {
+            throw new PersonalValidationException("Значение параметра запроса не должно быть меньше 0");
+        }
+        if (size <= 0) {
+            throw new PersonalValidationException("Значение параметра запроса не должно быть меньше либо равно 0");
+        }
         return itemRequestService.getAllByOthers(userId, from, size);
     }
 
@@ -52,18 +58,6 @@ public class ItemRequestController {
         isValidUser(userId);
         return itemRequestService.getById(requestId, userId);
     }
-
-    /*@PatchMapping("/{id}")
-    public ItemRequestDto update(@RequestBody Long id, @RequestHeader("X-Sharer-User-Id") Long userId,
-                                 @RequestBody ItemRequestDto itemRequestDto) {
-        isValidUser(userId);
-        if (itemRequestDto.getDescription() == null) {
-            if (itemRequestDto.getDescription().isBlank()) {
-                throw new PersonalValidationException("Поле с описанием не должно быть пустым.");
-            }
-        }
-        return itemRequestService.update(id, userId, itemRequestDto);
-    }*/
 
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id, @RequestHeader("X-Sharer-User-Id") Long userId) {

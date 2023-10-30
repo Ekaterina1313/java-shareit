@@ -5,12 +5,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.EntityNotFoundException;
 import ru.practicum.shareit.exception.PersonalValidationException;
 import ru.practicum.shareit.item.dao.ItemRepository;
-import ru.practicum.shareit.item.dto.ItemDtoForRequest;
+import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.request.dao.ItemRequestRepository;
@@ -21,7 +22,6 @@ import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 
-import org.springframework.data.domain.Pageable;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -61,13 +61,13 @@ public class ItemRequestServiceImplBd implements ItemRequestService {
                 .map(ItemRequest::getId)
                 .collect(Collectors.toList());
         List<Item> items = itemRepository.findByRequestIds(requestIds);
-        List<ItemDtoForRequest> responses = items.stream()
-                .map(ItemMapper::toItemDtoForRequest)
+        List<ItemDto> responses = items.stream()
+                .map(ItemMapper::toItemDto)
                 .collect(Collectors.toList());
 
         List<ItemRequestDtoFull> result = new ArrayList<>();
         for (ItemRequest element : listOfRequests) {
-            List<ItemDtoForRequest> requestResponses = responses.stream()
+            List<ItemDto> requestResponses = responses.stream()
                     .filter(response -> response.getRequestId().equals(element.getId()))
                     .collect(Collectors.toList());
             ItemRequestDtoFull requestDto = ItemRequestMapper.toItemRequestDtoFull(element, requestResponses);
@@ -91,13 +91,13 @@ public class ItemRequestServiceImplBd implements ItemRequestService {
                 .map(ItemRequest::getId)
                 .collect(Collectors.toList());
         List<Item> items = itemRepository.findByRequestIds(requestIds);
-        List<ItemDtoForRequest> responses = items.stream()
-                .map(ItemMapper::toItemDtoForRequest)
+        List<ItemDto> responses = items.stream()
+                .map(ItemMapper::toItemDto)
                 .collect(Collectors.toList());
 
         List<ItemRequestDtoFull> result = new ArrayList<>();
         for (ItemRequest element : itemRequests) {
-            List<ItemDtoForRequest> requestResponses = responses.stream()
+            List<ItemDto> requestResponses = responses.stream()
                     .filter(response -> response.getRequestId().equals(element.getId()))
                     .collect(Collectors.toList());
             ItemRequestDtoFull requestDto = ItemRequestMapper.toItemRequestDtoFull(element, requestResponses);
@@ -111,24 +111,11 @@ public class ItemRequestServiceImplBd implements ItemRequestService {
         userService.validUser(userId);
         ItemRequest itemRequest = validItemRequest(id);
         List<Item> responses = itemRepository.findByRequestId(id);
-        List<ItemDtoForRequest> result = responses.stream()
-                .map(ItemMapper::toItemDtoForRequest)
+        List<ItemDto> result = responses.stream()
+                .map(ItemMapper::toItemDto)
                 .collect(Collectors.toList());
-        return  ItemRequestMapper.toItemRequestDtoFull(itemRequest, result);
+        return ItemRequestMapper.toItemRequestDtoFull(itemRequest, result);
     }
-
-   /* @Override
-    public ItemRequestDto update(Long id, Long userId, ItemRequestDto itemRequestDto) {
-        ItemRequest itemRequest2 = validItemRequest(id);
-        userService.validUser(userId);
-        if (!Objects.equals(itemRequest2.getRequestor().getId(), userId)) {
-            throw new PersonalValidationException("Нельзя изменить чужой запрос.");
-        }
-        if (!itemRequestDto.getDescription().isBlank() || itemRequestDto.getDescription() != null) {
-            itemRequest2.setDescription(itemRequestDto.getDescription());
-        }
-        return ItemRequestMapper.toItemRequestDto(itemRequestRepository.save(itemRequest2), new ArrayList<>());
-    }*/
 
     @Override
     public void delete(Long id, Long userId) {

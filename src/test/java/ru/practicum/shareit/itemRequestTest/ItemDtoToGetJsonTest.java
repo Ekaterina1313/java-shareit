@@ -1,6 +1,5 @@
 package ru.practicum.shareit.itemRequestTest;
 
-
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.json.JsonTest;
@@ -32,13 +31,13 @@ public class ItemDtoToGetJsonTest {
 
         BookingDto lastBooking = new BookingDto();
         lastBooking.setId(101L);
-        lastBooking.setStart(LocalDateTime.of(2023,10,26,15,30,0));
-        lastBooking.setEnd(LocalDateTime.of(2023,10,26,16,30,0));
+        lastBooking.setStart(LocalDateTime.of(2023, 10, 26, 15, 30, 0));
+        lastBooking.setEnd(LocalDateTime.of(2023, 10, 26, 16, 30, 0));
 
         BookingDto nextBooking = new BookingDto();
         nextBooking.setId(102L);
-        nextBooking.setStart(LocalDateTime.of(2023,10,27,14,0,0));
-        nextBooking.setEnd(LocalDateTime.of(2023,10,27,15,0,0));
+        nextBooking.setStart(LocalDateTime.of(2023, 10, 27, 14, 0, 0));
+        nextBooking.setEnd(LocalDateTime.of(2023, 10, 27, 15, 0, 0));
 
         List<CommentDto> comments = new ArrayList<>();
         CommentDto comment1 = new CommentDto();

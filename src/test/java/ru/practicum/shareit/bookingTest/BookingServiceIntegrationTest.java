@@ -46,7 +46,8 @@ public class BookingServiceIntegrationTest {
     private CommentRepository commentRepository;
 
     @BeforeEach
-    void setUp() {}
+    void setUp() {
+    }
 
     @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
     @Test
@@ -118,5 +119,4 @@ public class BookingServiceIntegrationTest {
         assertEquals(3L, result.get(0).getId());
 
     }
-
 }

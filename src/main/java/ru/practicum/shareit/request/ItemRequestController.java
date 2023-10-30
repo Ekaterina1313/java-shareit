@@ -41,8 +41,8 @@ public class ItemRequestController {
 
     @GetMapping("/all")
     public List<ItemRequestDtoFull> getAllByOthers(@RequestHeader("X-Sharer-User-Id") Long userId,
-                                               @RequestParam(name = "from", defaultValue = "0") int from,
-                                               @RequestParam(name = "size", defaultValue = "10") int size) {
+                                                   @RequestParam(name = "from", defaultValue = "0") int from,
+                                                   @RequestParam(name = "size", defaultValue = "10") int size) {
         isValidUser(userId);
         if (from < 0) {
             throw new PersonalValidationException("Значение параметра запроса не должно быть меньше 0");

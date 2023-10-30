@@ -1,7 +1,6 @@
 package ru.practicum.shareit.itemTest;
 
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.json.JsonTest;
@@ -14,7 +13,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @JsonTest
 public class ItemDtoJsonTest {
-
     @Autowired
     private JacksonTester<ItemDto> json;
 

@@ -104,7 +104,8 @@ public class ItemRequestServiceImplDbTest {
         items.add(new Item(2L, "Item 2", "Description 2", true, 2L, otherUser));
         items.add(new Item(3L, "Item 3", "Description 3", true, 3L, otherUser));
 
-        Mockito.when(itemRequestRepository.findAll(PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "created"))))
+        Mockito.when(itemRequestRepository.findAll(PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC,
+                        "created"))))
                 .thenReturn(new PageImpl<>(otherUserRequests));
         Mockito.when(itemRepository.findByRequestIds(List.of(2L, 3L)))
                 .thenReturn(items);

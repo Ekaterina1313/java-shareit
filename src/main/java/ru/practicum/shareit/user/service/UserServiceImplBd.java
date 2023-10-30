@@ -71,9 +71,4 @@ public class UserServiceImplBd implements UserService {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("Не найден пользователь с id: " + userId));
     }
-
-    /*@Override
-    public void setUserRepository(UserRepository userRepository) {
-       this.userRepository = userRepository;
-    }*/
 }

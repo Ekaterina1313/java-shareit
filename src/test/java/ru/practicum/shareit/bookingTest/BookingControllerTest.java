@@ -34,13 +34,14 @@ public class BookingControllerTest {
     @Autowired
     private MockMvc mockMvc;
     BookingDto bookingDto;
-    LocalDateTime start = LocalDateTime.of(2024, 8, 26, 15,30);
-    LocalDateTime end = LocalDateTime.of(2024, 9, 26, 15,30);
+    LocalDateTime start = LocalDateTime.of(2024, 8, 26, 15, 30);
+    LocalDateTime end = LocalDateTime.of(2024, 9, 26, 15, 30);
     Long userId = 1L;
 
     @BeforeEach
     void setup() {
-        bookingDto = new BookingDto(1L, start, end, new User(), 1L, new Item(), Status.WAITING, 1L);
+        bookingDto = new BookingDto(1L, start, end, new User(), 1L, new Item(), Status.WAITING,
+                1L);
     }
 
     @Test
@@ -155,6 +156,7 @@ public class BookingControllerTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
     }
+
     @Test
     public void testStatusConfirmApprovedTrue() throws Exception {
         when(bookingService.statusConfirm(1L, userId, true)).thenReturn(bookingDto);

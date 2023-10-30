@@ -52,7 +52,8 @@ public class ItemControllerTest {
                         .post("/items")
                         .header("X-Sharer-User-Id", userId.toString())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"id\": 1, \"name\": \"ItemDtoName\", \"description\": \"ItemDtoDesc\", \"available\": true, \"requestId\": null}")
+                        .content("{\"id\": 1, \"name\": \"ItemDtoName\", \"description\": \"ItemDtoDesc\", " +
+                                "\"available\": true, \"requestId\": null}")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("ItemDtoName"));
@@ -65,7 +66,8 @@ public class ItemControllerTest {
         mockMvc.perform(MockMvcRequestBuilders
                         .post("/items")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"id\": 1, \"name\": \"ItemDtoName\", \"description\": \"ItemDtoDesc\", \"available\": true, \"requestId\": null}")
+                        .content("{\"id\": 1, \"name\": \"ItemDtoName\", \"description\": \"ItemDtoDesc\", " +
+                                "\"available\": true, \"requestId\": null}")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
     }
@@ -76,7 +78,8 @@ public class ItemControllerTest {
                         .post("/items")
                         .header("X-Sharer-User-Id", userId.toString())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"id\": 1, \"name\": \"\", \"description\": \"ItemDtoDesc\", \"available\": true, \"requestId\": null}")
+                        .content("{\"id\": 1, \"name\": \"\", \"description\": \"ItemDtoDesc\", " +
+                                "\"available\": true, \"requestId\": null}")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
     }
@@ -87,7 +90,8 @@ public class ItemControllerTest {
                         .post("/items")
                         .header("X-Sharer-User-Id", userId.toString())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"id\": 1, \"name\": \"ItemDtoName\", \"description\": \"\", \"available\": true, \"requestId\": null}")
+                        .content("{\"id\": 1, \"name\": \"ItemDtoName\", \"description\": \"\", " +
+                                "\"available\": true, \"requestId\": null}")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
     }
@@ -105,8 +109,8 @@ public class ItemControllerTest {
 
     @Test
     public void testGetAllItemsSuccess() throws Exception {
-        Long userId = 1L; // Замените на реальное значение userId
-        when(itemService.getAll(userId, 0, 10)).thenReturn(Collections.emptyList()); // Замените на ожидаемый результат
+        Long userId = 1L;
+        when(itemService.getAll(userId, 0, 10)).thenReturn(Collections.emptyList());
 
         mockMvc.perform(MockMvcRequestBuilders
                         .get("/items")
@@ -133,8 +137,8 @@ public class ItemControllerTest {
         mockMvc.perform(MockMvcRequestBuilders
                         .get("/items")
                         .header("X-Sharer-User-Id", userId.toString())
-                        .param("from", "-1") // Недопустимое значение
-                        .param("size", "-5")) // Недопустимое значение
+                        .param("from", "-1")
+                        .param("size", "-5"))
                 .andExpect(status().isBadRequest());
 
         verify(itemService, never()).getAll(anyLong(), anyInt(), anyInt());
@@ -152,7 +156,8 @@ public class ItemControllerTest {
                         .header("X-Sharer-User-Id", userId.toString())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"id\": " + itemDto.getId() +
-                                ", \"name\": \"Updated Name\", \"description\": \"Updated Description\", \"available\": false, \"requestId\": null}")
+                                ", \"name\": \"Updated Name\", \"description\": \"Updated Description\", " +
+                                "\"available\": false, \"requestId\": null}")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("Updated Name"))
@@ -167,7 +172,8 @@ public class ItemControllerTest {
                         .patch("/items/{itemId}", itemDto.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"id\": " + itemDto.getId() +
-                                ", \"name\": \"Updated Name\", \"description\": \"Updated Description\", \"available\": true, \"requestId\": null}")
+                                ", \"name\": \"Updated Name\", \"description\": \"Updated Description\", " +
+                                "\"available\": true, \"requestId\": null}")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
 
@@ -181,7 +187,8 @@ public class ItemControllerTest {
                         .header("X-Sharer-User-Id", userId.toString())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"id\": " + itemDto.getId() +
-                                ", \"name\": \"\", \"description\": \"Updated Description\", \"available\": true, \"requestId\": null}")
+                                ", \"name\": \"\", \"description\": \"Updated Description\", " +
+                                "\"available\": true, \"requestId\": null}")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
 
@@ -195,7 +202,8 @@ public class ItemControllerTest {
                         .header("X-Sharer-User-Id", userId.toString())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"id\": " + itemDto.getId() +
-                                ", \"name\": \"Updated Name\", \"description\": \"\", \"available\": true, \"requestId\": null}")
+                                ", \"name\": \"Updated Name\", \"description\": \"\", " +
+                                "\"available\": true, \"requestId\": null}")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
 
@@ -225,13 +233,13 @@ public class ItemControllerTest {
 
     @Test
     public void testSearchItemsSuccess() throws Exception {
-        String searchText = "example"; // Замените на реальный текст поиска
-        int from = 0; // Замените на ваше значение from
-        int size = 10; // Замените на ваше значение size
+        String searchText = "example";
+        int from = 0;
+        int size = 10;
 
-        List<ItemDto> searchResults = new ArrayList<>(); // Замените на реальные результаты поиска
+        List<ItemDto> searchResults = new ArrayList<>();
 
-        when(itemService.search(searchText,from, size, userId)).thenReturn(searchResults);
+        when(itemService.search(searchText, from, size, userId)).thenReturn(searchResults);
 
         mockMvc.perform(MockMvcRequestBuilders
                         .get("/items/search")
@@ -320,6 +328,7 @@ public class ItemControllerTest {
     @Test
     public void testCreateCommentWithEmptyText() throws Exception {
         Long itemId = 2L;
+
         mockMvc.perform(MockMvcRequestBuilders
                         .post("/items/" + itemId + "/comment")
                         .header("X-Sharer-User-Id", userId.toString())
@@ -344,5 +353,4 @@ public class ItemControllerTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
     }
-
 }

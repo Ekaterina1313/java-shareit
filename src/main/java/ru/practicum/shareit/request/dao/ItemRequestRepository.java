@@ -6,10 +6,7 @@ import ru.practicum.shareit.request.model.ItemRequest;
 
 import java.util.List;
 
-
 public interface ItemRequestRepository extends JpaRepository<ItemRequest, Long>,
         PagingAndSortingRepository<ItemRequest, Long> {
     List<ItemRequest> findByRequestorId(Long userId);
-
-
 }

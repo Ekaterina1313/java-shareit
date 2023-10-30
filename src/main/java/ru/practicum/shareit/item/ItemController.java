@@ -112,8 +112,9 @@ public class ItemController {
         }
         return true;
     }
+
     private boolean isValidPagination(int from, int size) {
-        if (from < 0 ) {
+        if (from < 0) {
             throw new PersonalValidationException("Параметр 'from' не должен принимать отрицательное значение.");
         }
         if (size <= 0) {

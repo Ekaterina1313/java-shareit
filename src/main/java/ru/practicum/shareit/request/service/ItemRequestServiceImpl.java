@@ -58,7 +58,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         return null;
     }
 
-  /*  @Override
+    /*  @Override
     public ItemRequestDto update(Long id, Long userId, ItemRequestDto itemRequestDto) {
         ItemRequest itemRequest2 = itemRequestDao.getById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Не найден запрос с id: " + id));

@@ -13,10 +13,10 @@ import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import java.time.LocalDateTime;
 import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
 @ExtendWith(SpringExtension.class)
@@ -29,8 +29,6 @@ public class CommentRepositoryTest {
     Item item = new Item();
     Comment comment1 = new Comment();
     Comment comment2 = new Comment();
-
-
     @Autowired
     private TestEntityManager entityManager;
 

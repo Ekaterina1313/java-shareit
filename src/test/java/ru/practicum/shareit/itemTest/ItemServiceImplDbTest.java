@@ -6,6 +6,7 @@ import org.mockito.Mockito;
 import org.springframework.boot.test.context.SpringBootTest;
 import ru.practicum.shareit.booking.dao.BookingRepository;
 import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.model.Status;
 import ru.practicum.shareit.exception.EntityNotFoundException;
 import ru.practicum.shareit.exception.PersonalValidationException;
 import ru.practicum.shareit.item.dao.CommentRepository;
@@ -19,11 +20,10 @@ import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.item.service.ItemServiceImplDb;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
-import ru.practicum.shareit.booking.model.Status;
-import java.util.Collections;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -51,7 +51,7 @@ public class ItemServiceImplDbTest {
         itemService = new ItemServiceImplDb(itemRepository, userService, bookingRepository, commentRepository);
         testUser = new User(1L, "Test User", "user@example.com");
         testItemDto = new ItemDto(1L, "Test ItemDto", "Description", true, null);
-         testItem = new Item(1L, "Test Item", "Description", true, null, testUser);
+        testItem = new Item(1L, "Test Item", "Description", true, null, testUser);
         when(userService.validUser(testUser.getId())).thenReturn(testUser);
     }
 
@@ -72,52 +72,52 @@ public class ItemServiceImplDbTest {
         assertEquals("Description", createdItem.getDescription());
     }
 
-        @Test
-        public void testGetAll() {
-            List<Item> userItems = new ArrayList<>();
-            userItems.add(new Item(1L, "Item 1", "Description 1", true, null,
-                    testUser));
-            userItems.add(new Item(2L, "Item 2", "Description 2", true, null,
-                    testUser));
-            userItems.add(new Item(3L, "Item 3", "Description 3", true, null,
-                    testUser));
+    @Test
+    public void testGetAll() {
+        List<Item> userItems = new ArrayList<>();
+        userItems.add(new Item(1L, "Item 1", "Description 1", true, null,
+                testUser));
+        userItems.add(new Item(2L, "Item 2", "Description 2", true, null,
+                testUser));
+        userItems.add(new Item(3L, "Item 3", "Description 3", true, null,
+                testUser));
 
-            List<Booking> bookings = new ArrayList<>();
-            bookings.add(new Booking(1L, LocalDateTime.now().minusHours(1), LocalDateTime.now().plusHours(1),
-                    userItems.get(0), testUser, Status.APPROVED));
-            bookings.add(new Booking(2L, LocalDateTime.now().plusHours(2), LocalDateTime.now().plusHours(4),
-                    userItems.get(0), testUser, Status.APPROVED));
-            bookings.add(new Booking(3L, LocalDateTime.now().minusHours(2), LocalDateTime.now().minusHours(1),
-                    userItems.get(1), testUser, Status.REJECTED));
-            bookings.add(new Booking(4L, LocalDateTime.now().plusHours(1), LocalDateTime.now().plusHours(3),
-                    userItems.get(1), testUser, Status.APPROVED));
-            bookings.add(new Booking(5L, LocalDateTime.now().minusHours(2), LocalDateTime.now().minusHours(1),
-                    userItems.get(2), testUser, Status.APPROVED));
-            bookings.add(new Booking(6L, LocalDateTime.now().plusHours(1), LocalDateTime.now().plusHours(3),
-                    userItems.get(2), testUser, Status.APPROVED));
+        List<Booking> bookings = new ArrayList<>();
+        bookings.add(new Booking(1L, LocalDateTime.now().minusHours(1), LocalDateTime.now().plusHours(1),
+                userItems.get(0), testUser, Status.APPROVED));
+        bookings.add(new Booking(2L, LocalDateTime.now().plusHours(2), LocalDateTime.now().plusHours(4),
+                userItems.get(0), testUser, Status.APPROVED));
+        bookings.add(new Booking(3L, LocalDateTime.now().minusHours(2), LocalDateTime.now().minusHours(1),
+                userItems.get(1), testUser, Status.REJECTED));
+        bookings.add(new Booking(4L, LocalDateTime.now().plusHours(1), LocalDateTime.now().plusHours(3),
+                userItems.get(1), testUser, Status.APPROVED));
+        bookings.add(new Booking(5L, LocalDateTime.now().minusHours(2), LocalDateTime.now().minusHours(1),
+                userItems.get(2), testUser, Status.APPROVED));
+        bookings.add(new Booking(6L, LocalDateTime.now().plusHours(1), LocalDateTime.now().plusHours(3),
+                userItems.get(2), testUser, Status.APPROVED));
 
-            List<Comment> comments = new ArrayList<>();
-            comments.add(new Comment(1L, "Comment 1", userItems.get(0), testUser, LocalDateTime.now()));
-            comments.add(new Comment(2L, "Comment 2", userItems.get(0), testUser, LocalDateTime.now()));
-            comments.add(new Comment(3L, "Comment 3", userItems.get(1), testUser, LocalDateTime.now()));
-            comments.add(new Comment(4L, "Comment 4", userItems.get(2), testUser, LocalDateTime.now()));
+        List<Comment> comments = new ArrayList<>();
+        comments.add(new Comment(1L, "Comment 1", userItems.get(0), testUser, LocalDateTime.now()));
+        comments.add(new Comment(2L, "Comment 2", userItems.get(0), testUser, LocalDateTime.now()));
+        comments.add(new Comment(3L, "Comment 3", userItems.get(1), testUser, LocalDateTime.now()));
+        comments.add(new Comment(4L, "Comment 4", userItems.get(2), testUser, LocalDateTime.now()));
 
-            Mockito.when(itemRepository.findByOwnerId(1L)).thenReturn(userItems);
-            Mockito.when(bookingRepository.findAllByItemIdIn(Mockito.anyList())).thenReturn(bookings);
-            Mockito.when(commentRepository.findAll()).thenReturn(comments);
+        Mockito.when(itemRepository.findByOwnerId(1L)).thenReturn(userItems);
+        Mockito.when(bookingRepository.findAllByItemIdIn(Mockito.anyList())).thenReturn(bookings);
+        Mockito.when(commentRepository.findAll()).thenReturn(comments);
 
-            List<ItemDtoToGet> items = itemService.getAll(1L, 0, 3);
+        List<ItemDtoToGet> items = itemService.getAll(1L, 0, 3);
 
-            assertEquals(3, items.size());
-            assertEquals("Item 3", items.get(0).getName());
-            assertEquals("Item 2", items.get(1).getName());
-            assertEquals("Item 1", items.get(2).getName());
-        }
+        assertEquals(3, items.size());
+        assertEquals("Item 3", items.get(0).getName());
+        assertEquals("Item 2", items.get(1).getName());
+        assertEquals("Item 1", items.get(2).getName());
+    }
 
     @Test
     public void testGetItemById() {
         List<Booking> bookings = new ArrayList<>();
-         bookings.add(new Booking(1L, LocalDateTime.now().minusHours(1), LocalDateTime.now().plusHours(1),
+        bookings.add(new Booking(1L, LocalDateTime.now().minusHours(1), LocalDateTime.now().plusHours(1),
                 testItem, testUser, Status.APPROVED));
         bookings.add(new Booking(2L, LocalDateTime.now().minusHours(2), LocalDateTime.now().plusHours(4),
                 testItem, testUser, Status.APPROVED));
@@ -126,7 +126,7 @@ public class ItemServiceImplDbTest {
         comments.add(new Comment(1L, "Comment 1", testItem, testUser, LocalDateTime.now()));
         comments.add(new Comment(2L, "Comment 2", testItem, testUser, LocalDateTime.now()));
 
-        // Пользователь является владельцем товара
+        // пользователь является владельцем товара
         when(itemRepository.findById(testItem.getId())).thenReturn(Optional.of(testItem));
         when(bookingRepository.findAllByItemId(testItem.getId())).thenReturn(bookings);
         when(commentRepository.findAllByItemId(testItem.getId())).thenReturn(comments);
@@ -136,8 +136,8 @@ public class ItemServiceImplDbTest {
         assertNotNull(itemDtoForOwner);
         assertEquals(testItem.getId(), itemDtoForOwner.getId());
 
-        // Пользователь не владеет товаром
-       User testUser2 = new User(2L, "Test User2", "user2@example.com");
+        // пользователь не владеет товаром
+        User testUser2 = new User(2L, "Test User2", "user2@example.com");
 
         when(itemRepository.findById(testItem.getId())).thenReturn(Optional.of(testItem));
         when(bookingRepository.findAllByItemId(testItem.getId())).thenReturn(new ArrayList<>());
@@ -149,7 +149,7 @@ public class ItemServiceImplDbTest {
         assertEquals(testItem.getId(), itemDtoForNonOwner.getId());
         assertTrue(itemDtoForNonOwner.getComments().isEmpty());
 
-        // Товар не существует.
+        // товар не существует.
         assertThrows(EntityNotFoundException.class, () -> itemService.getById(1000L, testUser.getId()));
     }
 
@@ -173,7 +173,8 @@ public class ItemServiceImplDbTest {
 
         when(itemRepository.findById(testItem.getId())).thenReturn(Optional.of(testItem));
 
-        assertThrows(EntityNotFoundException.class, () -> itemService.update(testItem.getId(), testUser2.getId(), testItemDto));
+        assertThrows(EntityNotFoundException.class, () -> itemService.update(testItem.getId(), testUser2.getId(),
+                testItemDto));
     }
 
     @Test
@@ -238,17 +239,17 @@ public class ItemServiceImplDbTest {
 
     }
 
-   @Test
-   public void testCreateCommentWithoutValidBooking() {
-       CommentDto commentDto = new CommentDto(1L, "Great item!", "Test User", LocalDateTime.now());
+    @Test
+    public void testCreateCommentWithoutValidBooking() {
+        CommentDto commentDto = new CommentDto(1L, "Great item!", "Test User", LocalDateTime.now());
 
-       Mockito.when(itemRepository.findById(1L)).thenReturn(Optional.of(testItem));
-       Mockito.when(bookingRepository.findBookingByBookerIdAndItemId(1L,
-               1L)).thenReturn(Collections.emptyList());
+        Mockito.when(itemRepository.findById(1L)).thenReturn(Optional.of(testItem));
+        Mockito.when(bookingRepository.findBookingByBookerIdAndItemId(1L,
+                1L)).thenReturn(Collections.emptyList());
 
-       assertThrows(PersonalValidationException.class,
-               () -> itemService.createComment(commentDto, 1L, 1L));
-   }
+        assertThrows(PersonalValidationException.class,
+                () -> itemService.createComment(commentDto, 1L, 1L));
+    }
 
     @Test
     public void testCreateCommentRejectedBooking() {

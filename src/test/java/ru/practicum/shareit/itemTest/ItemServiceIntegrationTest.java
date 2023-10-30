@@ -48,7 +48,8 @@ public class ItemServiceIntegrationTest {
     private CommentRepository commentRepository;
 
     @BeforeEach
-    void setUp() {}
+    void setUp() {
+    }
 
     @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
     @Test

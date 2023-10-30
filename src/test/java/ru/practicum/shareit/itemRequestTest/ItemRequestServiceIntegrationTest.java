@@ -83,7 +83,7 @@ public class ItemRequestServiceIntegrationTest {
         result = itemRequestService.getAllByOthers(user3.getId(), 0, 2);
         assertEquals(2, result.size());
         assertEquals(user2.getId(), result.get(1).getId());
-        assertEquals("Name 4",result.get(0).getItems().get(0).getName());
+        assertEquals("Name 4", result.get(0).getItems().get(0).getName());
 
         result = itemRequestService.getAllByOthers(user3.getId(), 0, 10);
         assertEquals(3, result.size());

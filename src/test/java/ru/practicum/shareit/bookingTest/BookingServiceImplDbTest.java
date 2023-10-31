@@ -15,10 +15,12 @@ import ru.practicum.shareit.exception.PersonalValidationException;
 import ru.practicum.shareit.item.dao.ItemRepository;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.service.ItemService;
+import ru.practicum.shareit.user.dao.UserRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -33,19 +35,24 @@ public class BookingServiceImplDbTest {
     private BookingRepository bookingRepository;
     private BookingService bookingService;
     private UserService userService;
+    private UserRepository userRepository;
     private ItemRepository itemRepository;
     private ItemService itemService;
     private User testUser;
     private User anotherUser;
     private Item testItem;
     private Booking testBooking;
+    private List<Booking> bookings;
+    LocalDateTime time;
 
 
     @BeforeEach
     void setUp() {
+        time = LocalDateTime.of(2020, 11, 11, 11, 11);
         itemRepository = mock(ItemRepository.class);
         itemService = mock(ItemService.class);
         userService = mock(UserService.class);
+        userRepository = mock(UserRepository.class);
         bookingRepository = mock(BookingRepository.class);
         bookingService = new BookingServiceImplBd(bookingRepository, userService, itemRepository, itemService);
         testUser = new User(1L, "Test User", "user@example.com");
@@ -56,7 +63,7 @@ public class BookingServiceImplDbTest {
 
         when(userService.validUser(testUser.getId())).thenReturn(testUser);
         when(itemService.validItem(testItem.getId())).thenReturn(testItem);
-
+        //when(bookingService.validBooking(testBooking.getId())).thenReturn(testBooking);
     }
 
     @Test
@@ -201,5 +208,79 @@ public class BookingServiceImplDbTest {
     public void testGetBookingsByOwnerInvalidState() {
         assertThrows(PersonalValidationException.class,
                 () -> bookingService.getBookingsByOwnerId("INVALID_STATE", 0, 10, 1L));
+    }
+
+    @Test
+    public void testGetUserBookingsWaiting() {
+        LocalDateTime now = LocalDateTime.now();
+        List<Booking> waitingBookings = new ArrayList<>();
+        waitingBookings.add(new Booking(1L, now.minusHours(1), now.plusHours(1), testItem, testUser, Status.WAITING));
+        waitingBookings.add(new Booking(2L, now.minusHours(2), now.plusHours(2), testItem, testUser, Status.WAITING));
+
+        Mockito.when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
+        Mockito.when(bookingRepository.findBookingsByBookerAndStatus(testUser, Status.WAITING)).thenReturn(waitingBookings);
+
+        List<BookingDto> result = bookingService.getBookingsByBookerId("WAITING", 0, 10, testUser.getId());
+
+        assertNotNull(result);
+        assertEquals(2, result.size());
+        for (BookingDto bookingDto : result) {
+            assertEquals(Status.WAITING, bookingDto.getStatus());
+        }
+    }
+
+    @Test
+    public void testGetUserBookingsRejected() {
+        LocalDateTime now = LocalDateTime.now();
+        List<Booking> rejectedBookings = new ArrayList<>();
+        rejectedBookings.add(new Booking(1L, now.minusHours(1), now.plusHours(1), testItem, testUser, Status.REJECTED));
+        rejectedBookings.add(new Booking(2L, now.minusHours(2), now.plusHours(2), testItem, testUser, Status.REJECTED));
+
+        Mockito.when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
+        Mockito.when(bookingRepository.findBookingsByBookerAndStatus(testUser, Status.REJECTED)).thenReturn(rejectedBookings);
+
+        List<BookingDto> result = bookingService.getBookingsByBookerId("REJECTED", 0, 10, testBooking.getId());
+
+        assertNotNull(result);
+        assertEquals(2, result.size());
+        for (BookingDto bookingDto : result) {
+            assertEquals(Status.REJECTED, bookingDto.getStatus());
+        }
+    }
+
+    @Test
+    public void testGetBookingsByOwnerWaiting() {
+        bookings = new ArrayList<>();
+        bookings.add(new Booking(1L, time.minusHours(1), time.plusHours(1), testItem, testUser, Status.WAITING));
+        bookings.add(new Booking(2L, time.minusHours(2), time.plusHours(2), testItem, testUser, Status.WAITING));
+
+        Mockito.when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
+        Mockito.when(bookingRepository.findBookingsByOwnerAndStatus(testUser, Status.WAITING)).thenReturn(bookings);
+
+        List<BookingDto> result = bookingService.getBookingsByOwnerId("WAITING", 0, 10, testUser.getId());
+
+        assertNotNull(result);
+        assertEquals(2, result.size());
+        for (BookingDto bookingDto : result) {
+            assertEquals(Status.WAITING, bookingDto.getStatus());
+        }
+    }
+
+    @Test
+    public void testGetBookingsByOwnerRejected() {
+        bookings = new ArrayList<>();
+        bookings.add(new Booking(1L, time.minusHours(1), time.plusHours(1), testItem, testUser, Status.REJECTED));
+        bookings.add(new Booking(2L, time.minusHours(2), time.plusHours(2), testItem, testUser, Status.REJECTED));
+
+        Mockito.when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
+        Mockito.when(bookingRepository.findBookingsByOwnerAndStatus(testUser, Status.REJECTED)).thenReturn(bookings);
+
+        List<BookingDto> result = bookingService.getBookingsByOwnerId("REJECTED", 0, 10, testUser.getId());
+
+        assertNotNull(result);
+        assertEquals(2, result.size());
+        for (BookingDto bookingDto : result) {
+            assertEquals(Status.REJECTED, bookingDto.getStatus());
+        }
     }
 }

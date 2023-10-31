@@ -3,6 +3,7 @@ package ru.practicum.shareit.userTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+import ru.practicum.shareit.exception.EntityNotFoundException;
 import ru.practicum.shareit.user.dao.UserRepository;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
@@ -110,5 +111,25 @@ public class UserServiceImplDbTest {
         when(userRepository.existsByEmail("existing@mail.com")).thenReturn(true);
 
         assertThrows(RuntimeException.class, () -> userService.update(userId, userDto));
+    }
+
+    @Test
+    public void testDelete() {
+        User user = new User(1L, "Test User", "user@mail.com");
+
+        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+
+        userService.delete(user.getId());
+
+        verify(userRepository, times(1)).deleteById(user.getId());
+    }
+
+    @Test
+    public void testDeleteNonExistentUser() {
+        Long nonExistentUserId = 99L;
+
+        when(userRepository.existsById(nonExistentUserId)).thenReturn(false);
+
+        assertThrows(EntityNotFoundException.class, () -> userService.delete(nonExistentUserId));
     }
 }

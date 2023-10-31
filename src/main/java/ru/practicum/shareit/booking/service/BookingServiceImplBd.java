@@ -146,7 +146,7 @@ public class BookingServiceImplBd implements BookingService {
                 .collect(Collectors.toList());
     }
 
-    private Booking validBooking(Long bookingId) {
+    public Booking validBooking(Long bookingId) {
         return bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new EntityNotFoundException("Не найдена бронь с id: " + bookingId));
     }

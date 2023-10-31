@@ -18,6 +18,7 @@ import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.item.service.ItemServiceImplDb;
+import ru.practicum.shareit.user.dao.UserRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 
@@ -36,6 +37,7 @@ public class ItemServiceImplDbTest {
     private ItemService itemService;
     private ItemRepository itemRepository;
     private UserService userService;
+    private UserRepository userRepository;
     private BookingRepository bookingRepository;
     private CommentRepository commentRepository;
     private User testUser;
@@ -48,6 +50,7 @@ public class ItemServiceImplDbTest {
         userService = mock(UserService.class);
         bookingRepository = mock(BookingRepository.class);
         commentRepository = mock(CommentRepository.class);
+        userRepository = mock(UserRepository.class);
         itemService = new ItemServiceImplDb(itemRepository, userService, bookingRepository, commentRepository);
         testUser = new User(1L, "Test User", "user@example.com");
         testItemDto = new ItemDto(1L, "Test ItemDto", "Description", true, null);
@@ -279,5 +282,35 @@ public class ItemServiceImplDbTest {
         testBooking.setEnd(LocalDateTime.now().plusHours(2));
 
         assertThrows(PersonalValidationException.class, () -> itemService.createComment(commentDto, 1L, 1L));
+    }
+
+    @Test
+    public void testDeleteItemSuccess() {
+        Mockito.when(itemRepository.findById(testItem.getId())).thenReturn(Optional.of(testItem));
+        itemService.delete(testItem.getId(), testUser.getId());
+
+        Mockito.verify(itemRepository).deleteById(testItem.getId());
+    }
+
+    @Test
+    public void testDeleteItemUserNotFound() {
+        Long userId = 999L;
+
+        assertThrows(EntityNotFoundException.class, () -> itemService.delete(testItem.getId(), userId));
+    }
+
+    @Test
+    public void testDeleteItemItemNotFound() {
+        Long itemId = 999L;
+
+        assertThrows(EntityNotFoundException.class, () -> itemService.delete(itemId, testUser.getId()));
+    }
+
+    @Test
+    public void testDeleteItemNotOwner() {
+        User user2 = new User(2L, "Test User2", "user2@mail.com");
+        Mockito.when(userRepository.findById(user2.getId())).thenReturn(Optional.of(user2));
+        Mockito.when(itemRepository.findById(testItem.getId())).thenReturn(Optional.of(testItem));
+        assertThrows(PersonalValidationException.class, () -> itemService.delete(testItem.getId(), user2.getId()));
     }
 }

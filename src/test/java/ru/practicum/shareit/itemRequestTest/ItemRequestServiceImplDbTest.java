@@ -7,6 +7,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import ru.practicum.shareit.exception.EntityNotFoundException;
+import ru.practicum.shareit.exception.PersonalValidationException;
 import ru.practicum.shareit.item.dao.ItemRepository;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
@@ -15,6 +17,7 @@ import ru.practicum.shareit.request.dto.ItemRequestDto;
 import ru.practicum.shareit.request.dto.ItemRequestDtoFull;
 import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.request.service.ItemRequestServiceImplBd;
+import ru.practicum.shareit.user.dao.UserRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 
@@ -23,14 +26,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @SpringBootTest
 public class ItemRequestServiceImplDbTest {
     private UserService userService;
+    private UserRepository userRepository;
     private ItemRepository itemRepository;
     private ItemRequestRepository itemRequestRepository;
     private ItemRequestServiceImplBd itemRequestService;
@@ -44,6 +47,7 @@ public class ItemRequestServiceImplDbTest {
     void setUp() {
         itemRepository = Mockito.mock(ItemRepository.class);
         userService = Mockito.mock(UserService.class);
+        userRepository = mock(UserRepository.class);
         itemRequestRepository = Mockito.mock(ItemRequestRepository.class);
         itemRequestService = new ItemRequestServiceImplBd(userService, itemRepository, itemRequestRepository);
         testUser = new User(1L, "Test User", "user@example.com");
@@ -51,7 +55,7 @@ public class ItemRequestServiceImplDbTest {
         testItem = new Item(1L, "Test Item", "Description", true, 1L, testUser);
         testItemRequestDto = new ItemRequestDto(1L, "Description", LocalDateTime.now());
         testItemRequest = new ItemRequest(1L, "Description", testUser, LocalDateTime.now());
-        when(userService.validUser(testUser.getId())).thenReturn(testUser);
+        Mockito.when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
 
     }
 
@@ -134,5 +138,74 @@ public class ItemRequestServiceImplDbTest {
         assertEquals(result.getItems().size(), 2);
         assertEquals(result.getDescription(), "Description");
         assertEquals(result.getId(), testItemRequest.getId());
+    }
+
+    @Test
+    public void testCreateItemRequestUserNotFound() {
+        Long userId = 999L;
+        Mockito.when(userService.validUser(999L)).thenThrow(EntityNotFoundException.class);
+        assertThrows(EntityNotFoundException.class, () -> itemRequestService.create(testItemRequestDto, userId));
+    }
+
+    @Test
+    public void testGetAllByUserIDEmptyResult() {
+        Mockito.when(itemRequestRepository.findByRequestorId(1L)).thenReturn(new ArrayList<>());
+
+        List<ItemRequestDtoFull> result = itemRequestService.getAllByOwner(1L);
+
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    public void testGetOtherUsersRequestsEmptyResult() {
+        Mockito.when(itemRequestRepository.findAll(PageRequest.of(0, 10,
+                        Sort.by(Sort.Direction.DESC, "created"))))
+                .thenReturn(new PageImpl<>(new ArrayList<>()));
+
+        List<ItemRequestDtoFull> result = itemRequestService.getAllByOthers(1L, 0, 10);
+
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    public void testGetByIdItemRequestNotFound() {
+        Long itemRequestId = 999L;
+
+        Mockito.when(itemRequestRepository.findById(itemRequestId)).thenReturn(Optional.empty());
+
+        assertThrows(EntityNotFoundException.class, () -> itemRequestService.getById(itemRequestId, 1L));
+    }
+
+    @Test
+    public void testDeleteItemRequestSuccess() {
+        Mockito.when(itemRequestRepository.findById(testItemRequest.getId())).thenReturn(Optional.of(testItemRequest));
+        itemRequestService.delete(testItemRequest.getId(), testUser.getId());
+
+        Mockito.verify(itemRequestRepository).deleteById(testItemRequest.getId());
+    }
+
+    @Test
+    public void testDeleteItemRequestUserNotFound() {
+        Long userId = 999L;
+
+        assertThrows(EntityNotFoundException.class, () -> itemRequestService.delete(testItemRequest.getId(), userId));
+    }
+
+    @Test
+    public void testDeleteItemRequestItemRequestNotFound() {
+        Long itemRequestId = 999L;
+
+        Mockito.when(itemRequestRepository.findById(itemRequestId)).thenReturn(Optional.empty());
+
+        assertThrows(EntityNotFoundException.class, () -> itemRequestService.delete(itemRequestId, testUser.getId()));
+    }
+
+    @Test
+    public void testDeleteItemRequestNotOwner() {
+        User otherUser = new User(2L, "Other User", "other@mail");
+        Mockito.when(itemRequestRepository.findById(testItemRequest.getId())).thenReturn(Optional.of(testItemRequest));
+        Mockito.when(userRepository.findById(otherUser.getId())).thenReturn(Optional.of(otherUser));
+
+        assertThrows(PersonalValidationException.class, () -> itemRequestService.delete(testUser.getId(), otherUser.getId()));
     }
 }

@@ -15,8 +15,6 @@ public interface ItemRequestService {
 
     ItemRequestDtoFull getById(Long id, Long userId);
 
-    //ItemRequestDto update(Long id, Long userId, ItemRequestDto itemRequestDto);
-
     void delete(Long id, Long userId);
 
     ItemRequest validItemRequest(Long requestId);

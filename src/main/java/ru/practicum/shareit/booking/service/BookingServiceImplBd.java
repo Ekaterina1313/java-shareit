@@ -150,19 +150,4 @@ public class BookingServiceImplBd implements BookingService {
         return bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new EntityNotFoundException("Не найдена бронь с id: " + bookingId));
     }
-
-    @Override
-    public List<BookingDto> getAll(Long userId) {
-        return null;
-    }
-
-    @Override
-    public BookingDto update(Long id, Long userId, BookingDto bookingDto) {
-        return null;
-    }
-
-    @Override
-    public void delete(Long id, Long userId) {
-
-    }
 }

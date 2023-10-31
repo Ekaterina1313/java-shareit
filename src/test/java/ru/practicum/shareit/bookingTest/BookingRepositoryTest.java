@@ -212,8 +212,8 @@ public class BookingRepositoryTest {
 
     @Test
     public void testFindAllByItemIdIn() {
-        List<Booking> bookingsForItemIds = bookingRepository.
-                findAllByItemIdIn(Arrays.asList(item.getId(), otherItem.getId()));
+        List<Booking> bookingsForItemIds = bookingRepository
+                .findAllByItemIdIn(Arrays.asList(item.getId(), otherItem.getId()));
 
         assertEquals(4, bookingsForItemIds.size());
     }

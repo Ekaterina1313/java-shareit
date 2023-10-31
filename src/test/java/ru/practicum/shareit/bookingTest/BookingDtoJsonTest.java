@@ -62,10 +62,10 @@ public class BookingDtoJsonTest {
         BookingDto bookingDto = json.parse(content).getObject();
 
         assertThat(bookingDto.getId()).isEqualTo(1L);
-        assertThat(bookingDto.getStart()).isEqualTo(LocalDateTime.
-                of(2022, 10, 26, 15, 30));
-        assertThat(bookingDto.getEnd()).isEqualTo(LocalDateTime.
-                of(2022, 10, 26, 16, 30));
+        assertThat(bookingDto.getStart()).isEqualTo(LocalDateTime
+                .of(2022, 10, 26, 15, 30));
+        assertThat(bookingDto.getEnd()).isEqualTo(LocalDateTime
+                .of(2022, 10, 26, 16, 30));
         assertThat(bookingDto.getStatus()).isEqualTo(Status.APPROVED);
         assertThat(bookingDto.getItemId()).isEqualTo(101L);
 

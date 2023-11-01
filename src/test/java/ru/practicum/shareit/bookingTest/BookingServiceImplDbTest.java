@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.boot.test.context.SpringBootTest;
+import ru.practicum.shareit.ClockProvider;
 import ru.practicum.shareit.booking.dao.BookingRepository;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.model.Booking;
@@ -19,7 +20,9 @@ import ru.practicum.shareit.user.dao.UserRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 
+import java.time.Clock;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -42,28 +45,35 @@ public class BookingServiceImplDbTest {
     private User anotherUser;
     private Item testItem;
     private Booking testBooking;
+    private Booking anotherBooking;
     private List<Booking> bookings;
     LocalDateTime time;
-
+    private ClockProvider clockProvider;
 
     @BeforeEach
     void setUp() {
         time = LocalDateTime.of(2020, 11, 11, 11, 11);
+        Clock clock = Clock.fixed(time.atZone(ZoneId.systemDefault()).toInstant(), ZoneId.systemDefault());
+        clockProvider = mock(ClockProvider.class);
+        Mockito.when(clockProvider.systemClock()).thenReturn(clock);
         itemRepository = mock(ItemRepository.class);
         itemService = mock(ItemService.class);
         userService = mock(UserService.class);
         userRepository = mock(UserRepository.class);
         bookingRepository = mock(BookingRepository.class);
-        bookingService = new BookingServiceImplBd(bookingRepository, userService, itemRepository, itemService);
+        bookingService = new BookingServiceImplBd(bookingRepository, userService, itemRepository, itemService, clockProvider);
         testUser = new User(1L, "Test User", "user@example.com");
         anotherUser = new User(2L, "Another User", "another@mail.com");
         testItem = new Item(1L, "Test Item", "Description", true, null, testUser);
         testBooking = new Booking(1L, LocalDateTime.now().minusHours(2), LocalDateTime.now().minusHours(1),
                 testItem, anotherUser, Status.APPROVED);
-
+        anotherBooking = new Booking(2L, LocalDateTime.now().minusHours(4), LocalDateTime.now().minusHours(3),
+                testItem, anotherUser, Status.APPROVED);
+        bookings = new ArrayList<>();
+        bookings.add(testBooking);
+        bookings.add(anotherBooking);
         when(userService.validUser(testUser.getId())).thenReturn(testUser);
         when(itemService.validItem(testItem.getId())).thenReturn(testItem);
-        //when(bookingService.validBooking(testBooking.getId())).thenReturn(testBooking);
     }
 
     @Test
@@ -281,6 +291,48 @@ public class BookingServiceImplDbTest {
         assertEquals(2, result.size());
         for (BookingDto bookingDto : result) {
             assertEquals(Status.REJECTED, bookingDto.getStatus());
+        }
+    }
+
+    @Test
+    public void testGetBookingsByOwnerCurrent() {
+        Mockito.when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
+        Mockito.when(bookingRepository.findByOwnerCurrent(testUser, time)).thenReturn(bookings);
+
+        List<BookingDto> result = bookingService.getBookingsByOwnerId("CURRENT", 0, 10, testUser.getId());
+
+        assertNotNull(result);
+        assertEquals(2, result.size());
+        for (BookingDto bookingDto : result) {
+            assertEquals(Status.APPROVED, bookingDto.getStatus());
+        }
+    }
+
+    @Test
+    public void testGetBookingsByOwnerPast() {
+        Mockito.when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
+        Mockito.when(bookingRepository.findByOwnerPast(testUser, time)).thenReturn(bookings);
+
+        List<BookingDto> result = bookingService.getBookingsByOwnerId("PAST", 0, 1, testUser.getId());
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        for (BookingDto bookingDto : result) {
+            assertEquals(Status.APPROVED, bookingDto.getStatus());
+        }
+    }
+
+    @Test
+    public void testGetBookingsByOwnerFuture() {
+        Mockito.when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
+        Mockito.when(bookingRepository.findByOwnerFuture(testUser, time)).thenReturn(bookings);
+
+        List<BookingDto> result = bookingService.getBookingsByOwnerId("FUTURE", 0, 1, testUser.getId());
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        for (BookingDto bookingDto : result) {
+            assertEquals(Status.APPROVED, bookingDto.getStatus());
         }
     }
 }

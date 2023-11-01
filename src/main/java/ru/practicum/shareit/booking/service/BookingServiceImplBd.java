@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.ClockProvider;
 import ru.practicum.shareit.booking.dao.BookingRepository;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingMapper;
@@ -16,6 +17,7 @@ import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 
+import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
@@ -30,15 +32,17 @@ public class BookingServiceImplBd implements BookingService {
     private final UserService userService;
     private final ItemRepository itemRepository;
     private final ItemService itemService;
+    private final ClockProvider clockProvider;
 
     @Autowired
     public BookingServiceImplBd(BookingRepository bookingRepository,
                                 @Qualifier("userServiceImplBd") UserService userService, ItemRepository itemRepository,
-                                @Qualifier("itemServiceImplDb") ItemService itemService) {
+                                @Qualifier("itemServiceImplDb") ItemService itemService, ClockProvider clockProvider) {
         this.bookingRepository = bookingRepository;
         this.userService = userService;
         this.itemRepository = itemRepository;
         this.itemService = itemService;
+        this.clockProvider = clockProvider;
     }
 
     @Override
@@ -95,16 +99,17 @@ public class BookingServiceImplBd implements BookingService {
 
     @Override
     public List<BookingDto> getBookingsByBookerId(String state, int from, int size, Long userId) {
+        Clock clock = clockProvider.systemClock();
         User user = userService.validUser(userId);
         List<Booking> listOfBookings;
         if (state.equalsIgnoreCase("all")) {
             listOfBookings = bookingRepository.findByBooker(user);
         } else if (state.equalsIgnoreCase("current")) {
-            listOfBookings = bookingRepository.findByBookerCurrent(user, LocalDateTime.now());
+            listOfBookings = bookingRepository.findByBookerCurrent(user, LocalDateTime.now(clock));
         } else if (state.equalsIgnoreCase("past")) {
-            listOfBookings = bookingRepository.findByBookerPast(user, LocalDateTime.now());
+            listOfBookings = bookingRepository.findByBookerPast(user, LocalDateTime.now(clock));
         } else if (state.equalsIgnoreCase("future")) {
-            listOfBookings = bookingRepository.findByBookerFuture(user, LocalDateTime.now());
+            listOfBookings = bookingRepository.findByBookerFuture(user, LocalDateTime.now(clock));
         } else if (state.equalsIgnoreCase("waiting")) {
             listOfBookings = bookingRepository.findBookingsByBookerAndStatus(user, WAITING);
         } else if (state.equalsIgnoreCase("rejected")) {
@@ -121,17 +126,18 @@ public class BookingServiceImplBd implements BookingService {
 
     @Override
     public List<BookingDto> getBookingsByOwnerId(String state, int from, int size, Long userId) {
+        Clock clock = clockProvider.systemClock();
         User user = userService.validUser(userId);
         List<Booking> listOfBookings;
 
         if (state.equalsIgnoreCase("all")) {
             listOfBookings = bookingRepository.findByOwner(user);
         } else if (state.equalsIgnoreCase("current")) {
-            listOfBookings = bookingRepository.findByOwnerCurrent(user, LocalDateTime.now());
+            listOfBookings = bookingRepository.findByOwnerCurrent(user, LocalDateTime.now(clock));
         } else if (state.equalsIgnoreCase("past")) {
-            listOfBookings = bookingRepository.findByOwnerPast(user, LocalDateTime.now());
+            listOfBookings = bookingRepository.findByOwnerPast(user, LocalDateTime.now(clock));
         } else if (state.equalsIgnoreCase("future")) {
-            listOfBookings = bookingRepository.findByOwnerFuture(user, LocalDateTime.now());
+            listOfBookings = bookingRepository.findByOwnerFuture(user, LocalDateTime.now(clock));
         } else if (state.equalsIgnoreCase("waiting")) {
             listOfBookings = bookingRepository.findBookingsByOwnerAndStatus(user, WAITING);
         } else if (state.equalsIgnoreCase("rejected")) {

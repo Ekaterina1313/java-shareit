@@ -21,7 +21,7 @@ public class ItemController {
     private final ItemService itemService;
 
     @Autowired
-    public ItemController(@Qualifier("itemServiceImplBd") ItemService itemService) {
+    public ItemController(@Qualifier("itemServiceImplDb") ItemService itemService) {
         this.itemService = itemService;
     }
 
@@ -42,10 +42,13 @@ public class ItemController {
     }
 
     @GetMapping
-    public List<ItemDtoToGet> getAll(@RequestHeader("X-Sharer-User-Id") Long userId) {
+    public List<ItemDtoToGet> getAll(@RequestHeader("X-Sharer-User-Id") Long userId,
+                                     @RequestParam(name = "from", defaultValue = "0") int from,
+                                     @RequestParam(name = "size", defaultValue = "10") int size) {
         isValid(userId);
+        isValidPagination(from, size);
         log.info("Поступил запрос на получение списка вещей пользователя с id = {}.", userId);
-        return itemService.getAll(userId);
+        return itemService.getAll(userId, from, size);
     }
 
     @GetMapping("/{id}")
@@ -82,13 +85,16 @@ public class ItemController {
 
     @GetMapping("/search")
     public List<ItemDto> search(@RequestParam("text") String searchText,
+                                @RequestParam(name = "from", defaultValue = "0") int from,
+                                @RequestParam(name = "size", defaultValue = "10") int size,
                                 @RequestHeader("X-Sharer-User-Id") Long userId) {
         isValid(userId);
+        isValidPagination(from, size);
         if (searchText == null || searchText.isBlank()) {
             return new ArrayList<>();
         }
         log.info("Поступил запрос на поиск списка вещей ключевым словам: {}.", searchText);
-        return itemService.search(searchText, userId);
+        return itemService.search(searchText, from, size, userId);
     }
 
     @PostMapping("/{itemId}/comment")
@@ -103,6 +109,16 @@ public class ItemController {
     private boolean isValid(Long userId) {
         if (userId == null) {
             throw new PersonalValidationException("Необходимо указать id пользователя в заголовке запроса.");
+        }
+        return true;
+    }
+
+    private boolean isValidPagination(int from, int size) {
+        if (from < 0) {
+            throw new PersonalValidationException("Параметр 'from' не должен принимать отрицательное значение.");
+        }
+        if (size <= 0) {
+            throw new PersonalValidationException("Параметр 'size' не должен принимать пустое или отрицательное значение.");
         }
         return true;
     }

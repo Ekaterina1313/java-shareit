@@ -50,13 +50,19 @@ public class ItemRequestServiceImplBd implements ItemRequestService {
         ItemRequest itemRequest = ItemRequestMapper.fromItemRequestDto(itemRequestDto);
         itemRequest.setCreated(LocalDateTime.now());
         itemRequest.setRequestor(userById);
-        return ItemRequestMapper.toItemRequestDtoFull(itemRequestRepository.save(itemRequest), new ArrayList<>());
+        return toItemRequestDtoFull(itemRequestRepository.save(itemRequest));
     }
 
     @Override
     public List<ItemRequestDtoFull> getAllByOwner(Long userId) {
         userService.validUser(userId);
         List<ItemRequest> listOfRequests = itemRequestRepository.findByRequestorId(userId);
+        List<ItemRequestDtoFull> result = getItemRequestsDtoFull(listOfRequests);
+        result.sort(Comparator.comparing(ItemRequestDtoFull::getCreated).reversed());
+        return result;
+    }
+
+    private List<ItemRequestDtoFull> getItemRequestsDtoFull(List<ItemRequest> listOfRequests) {
         List<Long> requestIds = listOfRequests.stream()
                 .map(ItemRequest::getId)
                 .collect(Collectors.toList());
@@ -73,10 +79,8 @@ public class ItemRequestServiceImplBd implements ItemRequestService {
             ItemRequestDtoFull requestDto = ItemRequestMapper.toItemRequestDtoFull(element, requestResponses);
             result.add(requestDto);
         }
-        result.sort(Comparator.comparing(ItemRequestDtoFull::getCreated).reversed());
         return result;
     }
-
 
     @Override
     public List<ItemRequestDtoFull> getAllByOthers(Long userId, int from, int size) {
@@ -87,23 +91,7 @@ public class ItemRequestServiceImplBd implements ItemRequestService {
         List<ItemRequest> itemRequests = page.getContent().stream()
                 .filter(itemRequest -> !userId.equals(itemRequest.getRequestor().getId()))
                 .collect(Collectors.toList());
-        List<Long> requestIds = itemRequests.stream()
-                .map(ItemRequest::getId)
-                .collect(Collectors.toList());
-        List<Item> items = itemRepository.findByRequestIds(requestIds);
-        List<ItemDto> responses = items.stream()
-                .map(ItemMapper::toItemDto)
-                .collect(Collectors.toList());
-
-        List<ItemRequestDtoFull> result = new ArrayList<>();
-        for (ItemRequest element : itemRequests) {
-            List<ItemDto> requestResponses = responses.stream()
-                    .filter(response -> response.getRequestId().equals(element.getId()))
-                    .collect(Collectors.toList());
-            ItemRequestDtoFull requestDto = ItemRequestMapper.toItemRequestDtoFull(element, requestResponses);
-            result.add(requestDto);
-        }
-        return result;
+        return getItemRequestsDtoFull(itemRequests);
     }
 
     @Override
@@ -131,5 +119,9 @@ public class ItemRequestServiceImplBd implements ItemRequestService {
     public ItemRequest validItemRequest(Long requestId) {
         return itemRequestRepository.findById(requestId)
                 .orElseThrow(() -> new EntityNotFoundException("Не найден запрос с id: " + requestId));
+    }
+
+    public static ItemRequestDtoFull toItemRequestDtoFull(ItemRequest itemRequest) {
+        return ItemRequestMapper.toItemRequestDtoFull(itemRequest, new ArrayList<>());
     }
 }

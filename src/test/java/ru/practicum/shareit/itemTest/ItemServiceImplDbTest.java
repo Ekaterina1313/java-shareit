@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.*;
 import ru.practicum.shareit.booking.dao.BookingRepository;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.Status;
@@ -43,6 +44,7 @@ public class ItemServiceImplDbTest {
     private User testUser;
     private Item testItem;
     private ItemDto testItemDto;
+    private Pageable pageable;
 
     @BeforeEach
     void setUp() {
@@ -78,12 +80,12 @@ public class ItemServiceImplDbTest {
     @Test
     public void testGetAll() {
         List<Item> userItems = new ArrayList<>();
-        userItems.add(new Item(1L, "Item 1", "Description 1", true, null,
-                testUser));
-        userItems.add(new Item(2L, "Item 2", "Description 2", true, null,
-                testUser));
-        userItems.add(new Item(3L, "Item 3", "Description 3", true, null,
-                testUser));
+        pageable = PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "name"));
+        userItems.add(new Item(1L, "Item 1", "Description 1", true, null, testUser));
+        userItems.add(new Item(2L, "Item 2", "Description 2", true, null, testUser));
+        userItems.add(new Item(3L, "Item 3", "Description 3", true, null, testUser));
+
+        Page<Item> page = new PageImpl<>(userItems);
 
         List<Booking> bookings = new ArrayList<>();
         bookings.add(new Booking(1L, LocalDateTime.now().minusHours(1), LocalDateTime.now().plusHours(1),
@@ -105,16 +107,16 @@ public class ItemServiceImplDbTest {
         comments.add(new Comment(3L, "Comment 3", userItems.get(1), testUser, LocalDateTime.now()));
         comments.add(new Comment(4L, "Comment 4", userItems.get(2), testUser, LocalDateTime.now()));
 
-        Mockito.when(itemRepository.findByOwnerId(1L)).thenReturn(userItems);
+        Mockito.when(itemRepository.findByOwnerId(1L, pageable)).thenReturn(page);
         Mockito.when(bookingRepository.findAllByItemIdIn(Mockito.anyList())).thenReturn(bookings);
         Mockito.when(commentRepository.findAll()).thenReturn(comments);
 
-        List<ItemDtoToGet> items = itemService.getAll(1L, 0, 3);
+        List<ItemDtoToGet> items = itemService.getAll(1L, 0, 10);
 
         assertEquals(3, items.size());
-        assertEquals("Item 3", items.get(0).getName());
+        assertEquals("Item 1", items.get(0).getName());
         assertEquals("Item 2", items.get(1).getName());
-        assertEquals("Item 1", items.get(2).getName());
+        assertEquals("Item 3", items.get(2).getName());
     }
 
     @Test
@@ -184,10 +186,11 @@ public class ItemServiceImplDbTest {
     public void testSearchItemsSuccess() {
         String searchText = "item";
         Item item2 = new Item(2L, "Item 2", "Description 2", true, null, testUser);
+        pageable = PageRequest.of(0, 10);
+        Page<Item> page = new PageImpl<>(List.of(testItem, item2));
+        Mockito.when(itemRepository.searchItems(searchText, pageable)).thenReturn(page);
 
-        Mockito.when(itemRepository.searchItems(searchText)).thenReturn(List.of(testItem, item2));
-
-        List<ItemDto> items = itemService.search(searchText, 0, 2, 1L);
+        List<ItemDto> items = itemService.search(searchText, 0, 10, 1L);
 
         assertEquals(2, items.size());
         assertEquals("Test Item", items.get(0).getName());
@@ -197,8 +200,9 @@ public class ItemServiceImplDbTest {
     @Test
     public void testSearchItemsEmptyResult() {
         String searchText = "nonexistent";
-
-        Mockito.when(itemRepository.searchItems(searchText)).thenReturn(Collections.emptyList());
+        pageable = PageRequest.of(0, 2);
+        Page<Item> page = new PageImpl<>(new ArrayList<>());
+        Mockito.when(itemRepository.searchItems(searchText, pageable)).thenReturn(page);
 
         List<ItemDto> items = itemService.search(searchText, 0, 2, 1L);
 
@@ -210,8 +214,9 @@ public class ItemServiceImplDbTest {
         String searchText = "item";
         Item item2 = new Item(2L, "Item 2", "Description 2", true, null, testUser);
         Item item3 = new Item(3L, "Item 3", "Description 3", true, null, testUser);
-
-        Mockito.when(itemRepository.searchItems(searchText)).thenReturn(List.of(testItem, item2, item3));
+        pageable = PageRequest.of(1, 2);
+        Page<Item> page = new PageImpl<>(List.of(item2, item3));
+        Mockito.when(itemRepository.searchItems(searchText, pageable)).thenReturn(page);
 
         List<ItemDto> items = itemService.search(searchText, 1, 2, 1L);
 

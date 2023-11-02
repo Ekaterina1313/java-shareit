@@ -74,12 +74,13 @@ public class ItemServiceIntegrationTest {
         List<ItemDtoToGet> resultUser1 = itemService.getAll(user1.getId(), 0, 2);
         assertNotNull(resultUser1);
         assertEquals(2, resultUser1.size());
-        assertEquals("Name 2", resultUser1.get(0).getName());
-        assertEquals("Desc 1", resultUser1.get(1).getDescription());
-
-        resultUser1 = itemService.getAll(user1.getId(), 2, 10);
-        assertEquals(1, resultUser1.size());
         assertEquals("Name 3", resultUser1.get(0).getName());
+        assertEquals("Desc 2", resultUser1.get(1).getDescription());
+        assertNull(resultUser1.get(0).getNextBooking());
+
+        resultUser1 = itemService.getAll(user1.getId(), 1, 2);
+        assertEquals(1, resultUser1.size());
+        assertEquals("Name 1", resultUser1.get(0).getName());
 
         resultUser1 = itemService.getAll(user1.getId(), 0, 10);
         assertEquals(3, resultUser1.size());

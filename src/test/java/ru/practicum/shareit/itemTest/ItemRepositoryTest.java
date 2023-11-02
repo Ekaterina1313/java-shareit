@@ -6,6 +6,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import ru.practicum.shareit.item.dao.ItemRepository;
 import ru.practicum.shareit.item.model.Item;
@@ -30,9 +33,12 @@ public class ItemRepositoryTest {
     ItemRequest itemRequest1;
     Item item1;
     Item item2;
+    Pageable pageable;
 
     @BeforeEach
     public void setup() {
+        pageable = PageRequest.of(0, 10);
+
         user1 = new User();
         user1.setName("User1Name");
         user1.setEmail("user1@mail.com");
@@ -71,24 +77,24 @@ public class ItemRepositoryTest {
 
     @Test
     public void testSearchItems() {
-        List<Item> items1 = itemRepository.searchItems("item1name");
-        assertEquals(1, items1.size());
-        assertEquals("Item1Name", items1.get(0).getName());
+        Page<Item> items1 = itemRepository.searchItems("item1name", pageable);
+        assertEquals(1, items1.getContent().size());
+        assertEquals("Item1Name", items1.getContent().get(0).getName());
 
-        List<Item> items2 = itemRepository.searchItems("item2desc");
-        assertEquals(1, items2.size());
-        assertEquals("Item2Desc", items2.get(0).getDescription());
+        Page<Item> items2 = itemRepository.searchItems("item2desc", pageable);
+        assertEquals(1, items2.getContent().size());
+        assertEquals("Item2Desc", items2.getContent().get(0).getDescription());
 
-        List<Item> items3 = itemRepository.searchItems("NonExistentText");
-        assertEquals(0, items3.size());
+        Page<Item> items3 = itemRepository.searchItems("NonExistentText", pageable);
+        assertEquals(0, items3.getContent().size());
     }
 
     @Test
     public void testFindByOwnerId() {
-        List<Item> items = itemRepository.findByOwnerId(user2.getId());
-        assertEquals(2, items.size());
-        assertEquals("Item1Name", items.get(0).getName());
-        assertEquals("Item2Name", items.get(1).getName());
+        Page<Item> items = itemRepository.findByOwnerId(user2.getId(), pageable);
+        assertEquals(2, items.getContent().size());
+        assertEquals("Item1Name", items.getContent().get(0).getName());
+        assertEquals("Item2Name", items.getContent().get(1).getName());
     }
 
     @Test

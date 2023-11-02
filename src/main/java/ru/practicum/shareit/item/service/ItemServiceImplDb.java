@@ -3,6 +3,10 @@ package ru.practicum.shareit.item.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.dao.BookingRepository;
 import ru.practicum.shareit.booking.dto.BookingMapper;
@@ -20,7 +24,6 @@ import ru.practicum.shareit.user.service.UserService;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -60,8 +63,10 @@ public class ItemServiceImplDb implements ItemService {
         userService.validUser(userId);
         log.info("Получен список вещей пользователя с id = {}.", userId);
 
-        List<Item> userItems = itemRepository.findByOwnerId(userId);
-        userItems = userItems.stream().skip(from).limit(size).collect(Collectors.toList());
+        Pageable pageable = PageRequest.of(from, size, Sort.by(Sort.Direction.DESC, "name"));
+        Page<Item> page = itemRepository.findByOwnerId(userId, pageable);
+
+        List<Item> userItems = new ArrayList<>(page.getContent());
 
         List<Booking> allBooKings = bookingRepository.findAllByItemIdIn(userItems.stream()
                 .map(Item::getId)
@@ -101,10 +106,7 @@ public class ItemServiceImplDb implements ItemService {
                     BookingMapper.toBookingDto(nextBooking), commentDtos);
             itemDtos.add(itemDtoToGet);
         }
-        return itemDtos.stream()
-                .sorted(Comparator
-                        .comparing(ItemDtoToGet::getName)
-                        .reversed()).collect(Collectors.toList());
+        return itemDtos;
     }
 
     @Override
@@ -179,9 +181,11 @@ public class ItemServiceImplDb implements ItemService {
     public List<ItemDto> search(String searchText, int from, int size, Long userId) {
         userService.validUser(userId);
         log.info("Составлен список вещей, найденных по ключевым словам '{}'.", searchText);
-        return itemRepository.searchItems(searchText.toLowerCase()).stream()
-                .skip(from)
-                .limit(size)
+
+        Pageable pageable = PageRequest.of(from, size);
+        Page<Item> page = itemRepository.searchItems(searchText.toLowerCase(), pageable);
+        return page.getContent()
+                .stream()
                 .map(ItemMapper::toItemDto)
                 .collect(Collectors.toList());
     }
